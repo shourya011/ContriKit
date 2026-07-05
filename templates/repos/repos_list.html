@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Manage Repositories — ContribKit Editor{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-code-square text-indigo me-2"></i>My Linked Repositories</h2>
+      <p class="text-muted small mb-0">Repositories validated and auto-filled from GitHub API</p>
+    </div>
+    <a href="/editor/issues/" class="btn btn-outline-secondary btn-sm">My Posted Issues →</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- Add Repo Form -->
+    <div class="col-lg-4">
+      <div class="card p-4 bg-white shadow-sm border-0 sticky-top" style="top: 5rem;">
+        <h5 class="fw-bold mb-3"><i class="bi bi-plus-circle-fill text-indigo me-2"></i>Link New Repository</h5>
+        <p class="small text-muted mb-3">Paste a GitHub URL. We fetch name, stars, and language live from public GitHub API.</p>
+
+        <form method="POST" action="/editor/repos/">
+          {% csrf_token %}
+          {% if form.non_field_errors %}
+            <div class="alert alert-danger small py-2">{{ form.non_field_errors }}</div>
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">GitHub Repository URL <span class="text-danger">*</span></label>
+            {{ form.github_url }}
+            {% if form.github_url.errors %}
+              <div class="text-danger small mt-1">{{ form.github_url.errors.0 }}</div>
+            {% endif %}
+          </div>
+
+          <button type="submit" class="btn btn-primary w-100 fw-semibold py-2">
+            <i class="bi bi-cloud-download me-1"></i>Validate & Link Repo
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Repos List -->
+    <div class="col-lg-8">
+      {% if repos %}
+        <div class="d-flex flex-column gap-3">
+          {% for repo in repos %}
+            <div class="card p-4 shadow-sm border-0 card-hover">
+              <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-start gap-3">
+                <div>
+                  <div class="d-flex align-items-center gap-2 mb-1">
+                    <h5 class="fw-bold mb-0">
+                      <a href="/editor/repos/{{ repo.id }}/" class="text-dark text-decoration-none">{{ repo.name }}</a>
+                    </h5>
+                    {% if repo.is_active %}
+                      <span class="badge bg-success small">Active</span>
+                    {% else %}
+                      <span class="badge bg-secondary small">Inactive</span>
+                    {% endif %}
+                  </div>
+                  <p class="text-muted small mb-2">{{ repo.description|default:"No repository description provided." }}</p>
+                  
+                  <div class="d-flex gap-3 small text-secondary">
+                    <span>⭐ {{ repo.stars }} stars</span>
+                    <span>💻 {{ repo.language|default:"Multiple" }}</span>
+                    <span>📂 {{ repo.issues.count }} issues posted</span>
+                  </div>
+                </div>
+
+                <div class="d-flex gap-2">
+                  <a href="/editor/issues/import/?repo_id={{ repo.id }}" class="btn btn-sm btn-outline-primary fw-semibold" title="Import Issues">
+                    <i class="bi bi-cloud-arrow-down"></i> Import Issues
+                  </a>
+                  <a href="/editor/repos/{{ repo.id }}/" class="btn btn-sm btn-outline-dark" title="Manage Repo">
+                    <i class="bi bi-gear"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon"><i class="bi bi-github"></i></div>
+          <h4>No repositories linked</h4>
+          <p class="text-muted">Use the form on the left to paste a GitHub repository URL and start posting issues.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+{% block title %}Git Cheat Sheet — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app">
+  <header class="page-header text-center" style="max-width:680px;margin-inline:auto;text-align:center;">
+    <span class="section-eyebrow"><i class="bi bi-terminal"></i> Git Cheat Sheet</span>
+    <h1 class="page-header__title">Searchable Git Cheat Sheet</h1>
+    <p class="page-header__desc" style="margin-inline:auto;">Every command you need to fork, clone, branch, commit, push, and undo mistakes. Type below to filter instantly.</p>
+  </header>
+
+  <div class="cheat-search">
+    <div class="cheat-search__input">
+      <i class="bi bi-search"></i>
+      <input type="text" id="gitSearchInput" placeholder="Search commands, flags, or descriptions (e.g. undo, branch, clone)…" aria-label="Search Git commands">
+      <button type="button" id="clearSearchBtn" class="cheat-search__clear d-none" aria-label="Clear search">✕</button>
+    </div>
+  </div>
+
+  <div id="cheatSheetContainer" style="padding-bottom:64px;">
+    {% if sections %}
+      {% for sec in sections %}
+        <div class="cheat-section git-section" data-section-title="{{ sec.title|lower }}">
+          <div class="cheat-section__header">
+            <i class="bi bi-terminal-fill text-indigo fs-4"></i>
+            <h2 class="cheat-section__title">{{ sec.title }}</h2>
+          </div>
+
+          <div class="cheat-grid">
+            {% for cmd in sec.commands.all %}
+              <article class="cheat-card git-command-card" data-search-text="{{ cmd.command|lower }} {{ cmd.description|lower }} {{ cmd.example|lower }}">
+                <p class="cheat-card__desc">{{ cmd.description }}</p>
+                <div class="cheat-card__code">
+                  <code>{{ cmd.command }}</code>
+                  <button type="button" class="btn btn-ghost btn-sm btn-copy" data-clipboard-text="{{ cmd.command }}" title="Copy command" style="color:var(--color-slate-400);flex-shrink:0;">
+                    <i class="bi bi-clipboard"></i>
+                  </button>
+                </div>
+                {% if cmd.example %}
+                  <div class="cheat-card__example">
+                    <strong>Example:</strong> <span style="font-family:var(--font-mono);">{{ cmd.example }}</span>
+                  </div>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-terminal-x"></i></div>
+        <h4>No Git commands seeded yet</h4>
+        <p>Run <code>python manage.py seed_data</code> to populate the 30+ core Git commands.</p>
+      </div>
+    {% endif %}
+  </div>
+
+  <div id="noSearchResults" class="empty-state d-none">
+    <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+    <h4>No matching Git commands found</h4>
+    <p>Try searching for simpler keywords like 'push', 'commit', or 'undo'.</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const searchInput = document.getElementById('gitSearchInput');
+  const clearBtn = document.getElementById('clearSearchBtn');
+  const sections = document.querySelectorAll('.git-section');
+  const cards = document.querySelectorAll('.git-command-card');
+  const noResults = document.getElementById('noSearchResults');
+
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      const query = searchInput.value.toLowerCase().trim();
+      clearBtn.classList.toggle('d-none', query.length === 0);
+
+      let anyVisibleOverall = false;
+
+      sections.forEach(sec => {
+        const secCards = sec.querySelectorAll('.git-command-card');
+        let secHasVisible = false;
+
+        secCards.forEach(card => {
+          const text = card.getAttribute('data-search-text') || '';
+          if (text.includes(query)) {
+            card.style.display = '';
+            secHasVisible = true;
+            anyVisibleOverall = true;
+          } else {
+            card.style.display = 'none';
+          }
+        });
+
+        sec.style.display = secHasVisible ? '' : 'none';
+      });
+
+      if (!anyVisibleOverall && cards.length > 0) {
+        noResults.classList.remove('d-none');
+      } else {
+        noResults.classList.add('d-none');
+      }
+    });
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchInput.dispatchEvent(new Event('input'));
+      searchInput.focus();
+    });
+  }
+});
+</script>
+{% endblock %}

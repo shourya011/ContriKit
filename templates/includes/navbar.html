@@ -1,0 +1,148 @@
+<nav class="navbar-app" id="navbarApp" aria-label="Main navigation">
+  <div class="container-app navbar-app__inner">
+
+    <a class="navbar-app__brand" href="/">
+      <span class="navbar-app__logo"><i class="bi bi-rocket-takeoff-fill" aria-hidden="true"></i></span>
+      ContribKit
+    </a>
+
+    <ul class="navbar-app__nav">
+      <li>
+        <a class="navbar-app__link {% if '/issues/' in request.path %}is-active{% endif %}" href="/issues/">
+          Issues
+        </a>
+      </li>
+      <li>
+        <a class="navbar-app__link {% if '/templates' in request.path %}is-active{% endif %}" href="/templates/">
+          Templates
+        </a>
+      </li>
+      <li>
+        <a class="navbar-app__link {% if '/cheatsheet' in request.path %}is-active{% endif %}" href="/cheatsheet/">
+          Git Cheat Sheet
+        </a>
+      </li>
+      <li>
+        <a class="navbar-app__link" href="/#about">
+          About
+        </a>
+      </li>
+    </ul>
+
+    <div class="navbar-app__actions">
+      <form class="navbar-app__search" action="/issues/" method="GET" role="search">
+        <i class="bi bi-search navbar-app__search-icon" aria-hidden="true"></i>
+        <input type="search" name="q" placeholder="Search issues…" aria-label="Search issues" value="{{ request.GET.q|default:'' }}">
+      </form>
+
+      <div class="navbar-app__auth">
+        {% if user.is_authenticated %}
+          {% if is_platform_admin %}
+            <span class="badge bg-danger badge-role"><i class="bi bi-shield-lock-fill"></i> Admin</span>
+          {% elif is_editor %}
+            <span class="badge bg-indigo text-white badge-role"><i class="bi bi-pencil-square"></i> Editor</span>
+          {% endif %}
+
+          {% if is_platform_admin %}
+            <div class="dropdown">
+              <button class="btn btn-ghost btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-gear-fill"></i> Admin
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/admin-panel/users/">Manage Users</a></li>
+                <li><a class="dropdown-item" href="/admin-panel/issues/">Moderate Issues</a></li>
+                <li><a class="dropdown-item" href="/admin-panel/templates/">Template Library</a></li>
+                <li><a class="dropdown-item" href="/admin-panel/cheatsheet/">Cheat Sheet</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/admin-panel/analytics/">Platform Stats</a></li>
+                <li><a class="dropdown-item text-muted" href="/django-admin/" target="_blank"><small>Raw Django Admin ↗</small></a></li>
+              </ul>
+            </div>
+          {% endif %}
+
+          {% if is_editor %}
+            <div class="dropdown">
+              <button class="btn btn-ghost btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-code-square"></i> Editor
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/editor/repos/">My Repositories</a></li>
+                <li><a class="dropdown-item" href="/editor/issues/">My Posted Issues</a></li>
+                <li><a class="dropdown-item" href="/editor/issues/create/">Post New Issue</a></li>
+                <li><a class="dropdown-item" href="/editor/issues/import/">Bulk GitHub Import</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item" href="/editor/analytics/">Repo Analytics</a></li>
+              </ul>
+            </div>
+          {% endif %}
+
+          <div class="dropdown">
+            <button class="navbar-app__user dropdown-toggle border-0 bg-transparent" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <span class="navbar-app__avatar"><i class="bi bi-person-fill"></i></span>
+              <span class="d-none d-xl-inline text-meta fw-semibold">{{ user.username }}</span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="/dashboard/"><i class="bi bi-speedometer2 me-2"></i>My Dashboard</a></li>
+              <li><a class="dropdown-item" href="/dashboard/saved/"><i class="bi bi-bookmark-fill me-2"></i>Saved Issues</a></li>
+              <li><hr class="dropdown-divider"></li>
+              {% if is_editor and not is_platform_admin %}
+                <li>
+                  <form action="/dashboard/switch-role/" method="POST" class="px-2 py-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="role" value="viewer">
+                    <button type="submit" class="btn btn-sm btn-secondary w-100">Switch to Viewer</button>
+                  </form>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+              {% endif %}
+              <li>
+                <form action="/accounts/logout/" method="POST">
+                  {% csrf_token %}
+                  <button type="submit" class="dropdown-item text-danger"><i class="bi bi-box-arrow-right me-2"></i>Logout</button>
+                </form>
+              </li>
+            </ul>
+          </div>
+
+        {% else %}
+          <a class="btn btn-ghost btn-sm" href="/accounts/login/">Log In</a>
+          <a class="btn btn-primary btn-sm" href="/accounts/signup/">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+
+    <button class="navbar-app__toggle" type="button" id="navbarToggle" aria-label="Toggle navigation" aria-expanded="false">
+      <i class="bi bi-list fs-5"></i>
+    </button>
+  </div>
+
+  <!-- Mobile menu -->
+  <div class="navbar-app__mobile" id="navbarMobile">
+    <div class="container-app">
+      <form class="navbar-app__mobile-search" action="/issues/" method="GET" role="search">
+        <div style="position:relative">
+          <i class="bi bi-search navbar-app__search-icon" aria-hidden="true"></i>
+          <input type="search" name="q" placeholder="Search issues…" aria-label="Search issues">
+        </div>
+      </form>
+      <ul class="navbar-app__mobile-nav">
+        <li><a href="/issues/" {% if '/issues' in request.path %}class="is-active"{% endif %}>Issues</a></li>
+        <li><a href="/templates/" {% if '/templates' in request.path %}class="is-active"{% endif %}>Templates</a></li>
+        <li><a href="/cheatsheet/" {% if '/cheatsheet' in request.path %}class="is-active"{% endif %}>Git Cheat Sheet</a></li>
+        <li><a href="/#about">About</a></li>
+      </ul>
+      <div class="navbar-app__mobile-auth">
+        {% if user.is_authenticated %}
+          <a class="btn btn-secondary" href="/dashboard/">Dashboard</a>
+          <form action="/accounts/logout/" method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-ghost w-100">Logout</button>
+          </form>
+        {% else %}
+          <a class="btn btn-secondary" href="/accounts/login/">Log In</a>
+          <a class="btn btn-primary" href="/accounts/signup/">Sign Up</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>

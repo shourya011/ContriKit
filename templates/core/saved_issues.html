@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Saved Issues — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1"><i class="bi bi-bookmark-fill text-indigo me-2"></i>Saved Issues</h2>
+      <p class="text-muted small mb-0">Issues you bookmarked to contribute to later</p>
+    </div>
+    <a href="/dashboard/" class="btn btn-outline-secondary btn-sm">← Back to Dashboard</a>
+  </div>
+
+  <div id="savedIssuesList">
+    {% if saved_issues %}
+      <div class="row g-4">
+        {% for item in saved_issues %}
+          <div class="col-md-6 col-lg-4 saved-issue-card">
+            <div class="card h-100 p-4 d-flex flex-column shadow-sm">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <span class="badge bg-secondary bg-opacity-10 text-dark border">{{ item.issue.repo.name }}</span>
+                {% if item.issue.difficulty == 'beginner' %}
+                  <span class="badge bg-success bg-opacity-10 text-success border border-success">Beginner</span>
+                {% else %}
+                  <span class="badge bg-warning bg-opacity-10 text-dark border border-warning">Intermediate</span>
+                {% endif %}
+              </div>
+
+              <h5 class="fw-bold mt-2 mb-2">
+                <a href="/issues/{{ item.issue.id }}/" class="text-dark text-decoration-none">{{ item.issue.title }}</a>
+              </h5>
+
+              <p class="text-muted small mb-4 flex-grow-1" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                {{ item.issue.description }}
+              </p>
+
+              <div class="d-flex justify-content-between align-items-center pt-3 border-top mt-auto small">
+                <span class="text-muted"><i class="bi bi-clock me-1"></i>~{{ item.issue.estimated_hours }}h est.</span>
+                <div class="d-flex gap-2">
+                  <button type="button" class="btn btn-sm btn-primary btn-toggle-save" data-issue-id="{{ item.issue.id }}">
+                    <i class="bi bi-bookmark-fill"></i> Saved
+                  </button>
+                  <a href="{{ item.issue.github_issue_url }}" target="_blank" class="btn btn-sm btn-outline-dark" title="Open on GitHub">
+                    <i class="bi bi-github"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-bookmark-x"></i></div>
+        <h4>No saved issues</h4>
+        <p class="text-muted">You haven't saved any issues yet. Browse the issue board to find beginner opportunities!</p>
+        <a href="/issues/" class="btn btn-primary mt-2">Browse Issues</a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

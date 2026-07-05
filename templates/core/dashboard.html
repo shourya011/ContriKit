@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <!-- Welcome Banner -->
+  <div class="card p-4 bg-white shadow-sm mb-4 border-0">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+      <div>
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <h2 class="fw-bold mb-0">Hello, {{ user.username }}!</h2>
+          {% if is_platform_admin %}
+            <span class="badge bg-danger badge-role">Admin</span>
+          {% elif is_editor %}
+            <span class="badge bg-indigo badge-role">Editor</span>
+          {% else %}
+            <span class="badge bg-secondary badge-role">Viewer</span>
+          {% endif %}
+        </div>
+        <p class="text-muted mb-0">Welcome to your personal contributor hub.</p>
+      </div>
+
+      <div>
+        {% if not is_editor %}
+          <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#upgradeModal">
+            <i class="bi bi-rocket-takeoff me-2"></i>Become an Editor
+          </button>
+        {% else %}
+          <a href="/editor/repos/" class="btn btn-primary fw-semibold shadow-sm">
+            <i class="bi bi-code-square me-2"></i>Editor Hub
+          </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Dashboard Grid -->
+  <div class="row g-4 mb-4">
+    <div class="col-md-6">
+      <div class="card p-4 h-100 bg-white shadow-sm">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="fw-bold mb-0"><i class="bi bi-bookmark-fill text-indigo me-2"></i>Saved Issues Preview</h5>
+          <a href="/dashboard/saved/" class="small text-decoration-none fw-semibold">View All ({{ total_saved }}) →</a>
+        </div>
+
+        <div id="savedIssuesPreview">
+          {% if saved_issues %}
+            <div class="d-flex flex-column gap-3">
+              {% for item in saved_issues %}
+                <div class="p-3 border rounded card-hover bg-light d-flex justify-content-between align-items-center">
+                  <div>
+                    <span class="badge bg-secondary small mb-1">{{ item.issue.repo.name }}</span>
+                    <h6 class="fw-bold mb-1"><a href="/issues/{{ item.issue.id }}/" class="text-dark text-decoration-none">{{ item.issue.title }}</a></h6>
+                    <small class="text-muted"><i class="bi bi-clock me-1"></i>~{{ item.issue.estimated_hours }}h</small>
+                  </div>
+                  <a href="{{ item.issue.github_issue_url }}" target="_blank" class="btn btn-sm btn-outline-dark" data-bs-toggle="tooltip" title="Open on GitHub">
+                    <i class="bi bi-github"></i>
+                  </a>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="empty-state my-2 py-4">
+              <i class="bi bi-bookmark text-muted fs-2"></i>
+              <p class="small text-muted mt-2 mb-0">You haven't saved any issues yet.</p>
+              <a href="/issues/" class="btn btn-sm btn-outline-primary mt-2">Browse Issues</a>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-4 h-100 bg-white shadow-sm">
+        <h5 class="fw-bold mb-3"><i class="bi bi-compass-fill text-indigo me-2"></i>Quick Navigation</h5>
+        <div class="d-flex flex-column gap-2">
+          <a href="/issues/" class="p-3 border rounded text-decoration-none text-dark d-flex align-items-center gap-3 card-hover bg-light">
+            <i class="bi bi-search fs-4 text-indigo"></i>
+            <div>
+              <div class="fw-bold">Explore Beginner Issues</div>
+              <div class="small text-muted">Filter by language, difficulty, and tech tags</div>
+            </div>
+          </a>
+          <a href="/templates/" class="p-3 border rounded text-decoration-none text-dark d-flex align-items-center gap-3 card-hover bg-light">
+            <i class="bi bi-file-earmark-code fs-4 text-indigo"></i>
+            <div>
+              <div class="fw-bold">Copy Repo Templates</div>
+              <div class="small text-muted">README, CONTRIBUTING.md, and PR templates</div>
+            </div>
+          </a>
+          <a href="/cheatsheet/" class="p-3 border rounded text-decoration-none text-dark d-flex align-items-center gap-3 card-hover bg-light">
+            <i class="bi bi-terminal fs-4 text-indigo"></i>
+            <div>
+              <div class="fw-bold">Git Command Cheat Sheet</div>
+              <div class="small text-muted">Searchable workflows for branching and commits</div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Become an Editor Modal -->
+<div class="modal fade" id="upgradeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header border-bottom-0 pt-4 px-4">
+        <h5 class="modal-title fw-bold"><i class="bi bi-rocket-takeoff-fill text-indigo me-2"></i>Become an Editor</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body px-4">
+        <p>As an Editor on ContribKit, you can:</p>
+        <ul class="text-muted small">
+          <li>Post beginner contribution opportunities for your projects</li>
+          <li>Link repositories instantly with GitHub URL auto-fill</li>
+          <li>Bulk-import candidate issues from GitHub</li>
+          <li>Track view counts and contributor engagement analytics</li>
+        </ul>
+        <div class="alert alert-info small mb-0">
+          <i class="bi bi-info-circle-fill me-2"></i>No approval needed. You can switch back to Viewer anytime in account settings without losing data.
+        </div>
+      </div>
+      <div class="modal-footer border-top-0 pb-4 px-4">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <form action="/dashboard/switch-role/" method="POST" class="m-0">
+          {% csrf_token %}
+          <input type="hidden" name="role" value="editor">
+          <button type="submit" class="btn btn-primary fw-semibold px-4">Upgrade Now</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

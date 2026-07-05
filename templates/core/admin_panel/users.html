@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Manage Users — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-danger mb-1"><i class="bi bi-shield-lock-fill me-1"></i>Platform Admin</span>
+      <h2 class="fw-bold mb-0">User & Role Management</h2>
+    </div>
+    <a href="/admin-panel/analytics/" class="btn btn-outline-secondary btn-sm">Platform Stats →</a>
+  </div>
+
+  <div class="card bg-white shadow-sm border-0 p-4">
+    <div class="table-responsive">
+      <table class="table table-hover align-middle">
+        <thead class="table-light small text-muted text-uppercase">
+          <tr>
+            <th>User</th>
+            <th>Email</th>
+            <th>GitHub</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Joined</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for u in users %}
+            <tr>
+              <td>
+                <div class="fw-bold text-dark">{{ u.username }}</div>
+                {% if u.is_superuser %}<span class="badge bg-danger small">Superuser</span>{% endif %}
+              </td>
+              <td>{{ u.email }}</td>
+              <td>
+                {% if u.github_username %}
+                  <a href="https://github.com/{{ u.github_username }}" target="_blank" class="text-indigo text-decoration-none">@{{ u.github_username }}</a>
+                {% else %}<span class="text-muted small">—</span>{% endif %}
+              </td>
+              <td>
+                <form method="POST" action="/admin-panel/users/" class="d-flex gap-1 align-items-center">
+                  {% csrf_token %}
+                  <input type="hidden" name="user_id" value="{{ u.id }}">
+                  <select name="role" class="form-select form-select-sm fw-semibold {% if u.role == 'admin' %}text-danger border-danger{% elif u.role == 'editor' %}text-indigo border-indigo{% else %}text-secondary{% endif %}" style="width: 110px;" onchange="this.form.submit()" {% if u.is_superuser %}disabled{% endif %}>
+                    {% for val, lbl in role_choices %}
+                      <option value="{{ val }}" {% if u.role == val %}selected{% endif %}>{{ lbl }}</option>
+                    {% endfor %}
+                  </select>
+                </form>
+              </td>
+              <td>
+                {% if u.is_active %}
+                  <span class="badge bg-success">Active</span>
+                {% else %}
+                  <span class="badge bg-secondary">Deactivated</span>
+                {% endif %}
+              </td>
+              <td class="small text-muted">{{ u.date_joined|date:"M d, Y" }}</td>
+              <td class="text-end">
+                {% if not u.is_superuser or request.user.is_superuser %}
+                  <form method="POST" action="/admin-panel/users/">
+                    {% csrf_token %}
+                    <input type="hidden" name="user_id" value="{{ u.id }}">
+                    <input type="hidden" name="action" value="toggle_active">
+                    <button type="submit" class="btn btn-sm {% if u.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                      {% if u.is_active %}Deactivate{% else %}Reactivate{% endif %}
+                    </button>
+                  </form>
+                {% else %}
+                  <span class="text-muted small">Protected</span>
+                {% endif %}
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

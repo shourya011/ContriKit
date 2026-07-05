@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+{% block title %}Browse Issues — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app">
+  <header class="page-header">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+      <div>
+        <span class="section-eyebrow"><i class="bi bi-grid-3x3-gap"></i> Issue Board</span>
+        <h1 class="page-header__title">Beginner Issue Board</h1>
+        <p class="page-header__desc">Richer than raw GitHub search. Curated opportunities with context, difficulty ratings, and estimated time.</p>
+      </div>
+      {% if is_editor %}
+        <a href="/editor/issues/create/" class="btn btn-primary">
+          <i class="bi bi-plus-lg"></i> Post New Issue
+        </a>
+      {% endif %}
+    </div>
+  </header>
+
+  <!-- Filter bar -->
+  <div class="filter-bar">
+    <form method="GET" action="/issues/">
+      <div class="filter-bar__grid">
+        <div>
+          <label class="filter-bar__label">Keyword Search</label>
+          <div class="filter-bar__input-group">
+            <i class="bi bi-search"></i>
+            <input type="text" name="q" placeholder="Title, repo, or description…" value="{{ q }}">
+          </div>
+        </div>
+        <div>
+          <label class="filter-bar__label">Language</label>
+          <select name="lang" class="form-select">
+            <option value="">All Languages</option>
+            {% for l in languages %}
+              <option value="{{ l }}" {% if selected_lang == l %}selected{% endif %}>{{ l }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="filter-bar__label">Difficulty</label>
+          <select name="diff" class="form-select">
+            <option value="">All Difficulties</option>
+            <option value="beginner" {% if selected_diff == 'beginner' %}selected{% endif %}>Beginner</option>
+            <option value="intermediate" {% if selected_diff == 'intermediate' %}selected{% endif %}>Intermediate</option>
+          </select>
+        </div>
+        <div>
+          <label class="filter-bar__label">Tech Tag</label>
+          <select name="tag" class="form-select">
+            <option value="">All Tags</option>
+            {% for t in tags %}
+              <option value="{{ t.slug }}" {% if selected_tag == t.slug %}selected{% endif %}>{{ t.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Filter</button>
+          {% if q or selected_lang or selected_diff or selected_tag %}
+            <a href="/issues/" class="btn btn-secondary btn-icon" title="Clear filters"><i class="bi bi-x-lg"></i></a>
+          {% endif %}
+        </div>
+      </div>
+    </form>
+  </div>
+
+  {% if page_obj %}
+    <div class="issues-grid" style="margin-bottom:48px;">
+      {% for issue in page_obj %}
+        <article class="issue-card card-hover {% if issue.is_featured %}is-featured{% endif %}">
+          <div class="issue-card__header">
+            <span class="badge badge-repo">{{ issue.repo.name }}</span>
+            <div class="issue-card__badges">
+              {% if issue.is_featured %}
+                <span class="badge badge-featured">Featured</span>
+              {% endif %}
+              {% if issue.difficulty == 'beginner' %}
+                <span class="badge badge-beginner">Beginner</span>
+              {% else %}
+                <span class="badge badge-intermediate">Intermediate</span>
+              {% endif %}
+              {% if issue.repo.language %}
+                <span class="badge badge-lang">{{ issue.repo.language }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <h3 class="issue-card__title">
+            <a href="/issues/{{ issue.id }}/">{{ issue.title }}</a>
+          </h3>
+
+          <p class="issue-card__desc">{{ issue.description }}</p>
+
+          {% if issue.tags.all %}
+            <div class="issue-card__tags">
+              {% for tag in issue.tags.all %}
+                <span class="issue-card__tag" style="background-color:{{ tag.color }};">{{ tag.name }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+
+          <div class="issue-card__footer">
+            <span class="issue-card__meta"><i class="bi bi-clock"></i> ~{{ issue.estimated_hours }}h</span>
+            <div class="issue-card__actions">
+              {% if user.is_authenticated %}
+                {% if issue.id in saved_ids %}
+                  <button type="button" class="btn btn-primary btn-sm btn-toggle-save" data-issue-id="{{ issue.id }}">
+                    <i class="bi bi-bookmark-fill"></i> Saved
+                  </button>
+                {% else %}
+                  <button type="button" class="btn btn-secondary btn-sm btn-toggle-save" data-issue-id="{{ issue.id }}">
+                    <i class="bi bi-bookmark"></i> Save
+                  </button>
+                {% endif %}
+              {% else %}
+                <a href="/accounts/login/?next=/issues/" class="btn btn-secondary btn-sm">
+                  <i class="bi bi-bookmark"></i> Save
+                </a>
+              {% endif %}
+              <a href="{{ issue.github_issue_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-sm btn-icon" title="Open on GitHub">
+                <i class="bi bi-github"></i>
+              </a>
+            </div>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+      <nav class="d-flex justify-content-center" style="padding-bottom:64px;" aria-label="Issue pagination">
+        <ul class="pagination">
+          {% if page_obj.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_lang %}&lang={{ selected_lang }}{% endif %}{% if selected_diff %}&diff={{ selected_diff }}{% endif %}{% if selected_tag %}&tag={{ selected_tag }}{% endif %}">Previous</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+          {% endif %}
+
+          {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+              <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+              <li class="page-item"><a class="page-link" href="?page={{ num }}{% if q %}&q={{ q }}{% endif %}{% if selected_lang %}&lang={{ selected_lang }}{% endif %}{% if selected_diff %}&diff={{ selected_diff }}{% endif %}{% if selected_tag %}&tag={{ selected_tag }}{% endif %}">{{ num }}</a></li>
+            {% endif %}
+          {% endfor %}
+
+          {% if page_obj.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}{% if selected_lang %}&lang={{ selected_lang }}{% endif %}{% if selected_diff %}&diff={{ selected_diff }}{% endif %}{% if selected_tag %}&tag={{ selected_tag }}{% endif %}">Next</a></li>
+          {% else %}
+            <li class="page-item disabled"><span class="page-link">Next</span></li>
+          {% endif %}
+        </ul>
+      </nav>
+    {% endif %}
+
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-search"></i></div>
+      <h4>No open issues match your filters</h4>
+      <p>Try broadening your search keywords or resetting the language/difficulty dropdowns.</p>
+      <a href="/issues/" class="btn btn-primary">Reset Filters</a>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,297 @@
+/* ── Desktop (1400+) — default styles above ── */
+
+/* ── Laptop (1200px) ── */
+@media (max-width: 1200px) {
+  :root {
+    --content-width: 100%;
+    --section-gap: 80px;
+  }
+
+  .issues-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .hero__layout {
+    gap: 48px;
+  }
+
+  .hero__visual {
+    height: 460px;
+  }
+
+  .footer-app__grid {
+    grid-template-columns: 1.5fr 1fr 1fr 1fr;
+    gap: 32px;
+  }
+
+  .filter-bar__grid {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  .filter-bar__grid > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .detail-layout {
+    grid-template-columns: 1fr 320px;
+  }
+}
+
+/* ── Tablet (768px) ── */
+@media (max-width: 768px) {
+  :root {
+    --section-gap: 64px;
+    --section-gap-sm: 48px;
+  }
+
+  .container-app {
+    padding-inline: 20px;
+  }
+
+  /* Navbar mobile */
+  .navbar-app__nav,
+  .navbar-app__search,
+  .navbar-app__auth {
+    display: none;
+  }
+
+  .navbar-app__toggle {
+    display: flex;
+  }
+
+  .navbar-app__mobile.is-open {
+    display: block;
+    position: absolute;
+    top: var(--navbar-height);
+    left: 0;
+    right: 0;
+    background: var(--color-white);
+    border-bottom: 1px solid var(--color-slate-200);
+    box-shadow: var(--shadow-lg);
+    padding: 20px;
+  }
+
+  .navbar-app__mobile-nav {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .navbar-app__mobile-nav a {
+    display: block;
+    padding: 12px 16px;
+    font-size: var(--text-meta);
+    font-weight: 500;
+    color: var(--color-slate-700);
+    border-radius: var(--radius-md);
+  }
+
+  .navbar-app__mobile-nav a:hover,
+  .navbar-app__mobile-nav a.is-active {
+    background: var(--color-primary-subtle);
+    color: var(--color-primary);
+  }
+
+  .navbar-app__mobile-search {
+    margin-bottom: 16px;
+  }
+
+  .navbar-app__mobile-search input {
+    width: 100%;
+    height: 44px;
+    padding: 0 14px 0 38px;
+    font-size: var(--text-meta);
+    background: var(--color-slate-100);
+    border: 1px solid var(--color-slate-200);
+    border-radius: var(--radius-md);
+  }
+
+  .navbar-app__mobile-auth {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-slate-200);
+  }
+
+  /* Hero */
+  .hero {
+    padding-block: 48px 64px;
+  }
+
+  .hero__layout {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .hero__content {
+    max-width: 100%;
+  }
+
+  .hero__visual {
+    height: 380px;
+    order: -1;
+  }
+
+  .hero__code-window {
+    right: 20px;
+  }
+
+  .hero__repo-card--1 {
+    right: 0;
+    top: 20px;
+  }
+
+  .hero__repo-card--2 {
+    display: none;
+  }
+
+  .hero__stats {
+    gap: 24px;
+  }
+
+  /* Grids */
+  .features-grid,
+  .templates-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .issues-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .cheat-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .about-stat-row {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .about-stat {
+    padding: 16px 12px;
+  }
+
+  .about-stat__value {
+    font-size: 1.5rem;
+  }
+
+  /* Footer */
+  .footer-app__grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 32px;
+  }
+
+  .footer-app__grid > :first-child {
+    grid-column: 1 / -1;
+  }
+
+  .footer-app__bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  /* Sections */
+  .section-header--row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .filter-bar {
+    padding: 20px;
+  }
+
+  .filter-bar__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .cta-banner {
+    padding: 40px 24px;
+  }
+
+  .page-header {
+    padding-block: 32px 24px;
+  }
+}
+
+/* ── Phone (480px) ── */
+@media (max-width: 480px) {
+  .container-app {
+    padding-inline: 16px;
+  }
+
+  .hero__stats {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .hero__actions {
+    flex-direction: column;
+  }
+
+  .hero__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .hero__visual {
+    height: 300px;
+  }
+
+  .hero__contrib-graph {
+    display: none;
+  }
+
+  .issues-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .issue-card {
+    padding: 20px;
+  }
+
+  .footer-app__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .about-stat-row {
+    grid-template-columns: 1fr;
+  }
+
+  .feature-card {
+    padding: 28px 24px;
+  }
+
+  .template-card {
+    padding: 24px;
+  }
+
+  .detail-cta {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .detail-cta__actions {
+    flex-direction: column;
+  }
+
+  .detail-cta__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

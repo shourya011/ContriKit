@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Manage Templates — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-danger mb-1"><i class="bi bi-shield-lock-fill me-1"></i>Platform Admin</span>
+      <h2 class="fw-bold mb-0">Template Library CRUD</h2>
+    </div>
+    <a href="/admin-panel/cheatsheet/" class="btn btn-outline-secondary btn-sm">Cheat Sheet CRUD →</a>
+  </div>
+
+  <div class="row g-4">
+    <!-- CRUD Form -->
+    <div class="col-lg-5">
+      <div class="card p-4 bg-white shadow-sm border-0 sticky-top" style="top: 5rem;">
+        <h5 class="fw-bold mb-3">{% if edit_tmpl %}Edit Template: {{ edit_tmpl.title }}{% else %}Add New Template{% endif %}</h5>
+        <form method="POST" action="/admin-panel/templates/">
+          {% csrf_token %}
+          <input type="hidden" name="action" value="save">
+          {% if edit_tmpl %}
+            <input type="hidden" name="tmpl_id" value="{{ edit_tmpl.id }}">
+          {% endif %}
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Title</label>
+            <input type="text" name="title" class="form-control" required value="{{ edit_tmpl.title|default:'' }}" placeholder="e.g. Standard README">
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Slug</label>
+              <input type="text" name="slug" class="form-control" required value="{{ edit_tmpl.slug|default:'' }}" placeholder="readme-md">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Type</label>
+              <select name="type" class="form-select" required>
+                {% for val, lbl in type_choices %}
+                  <option value="{{ val }}" {% if edit_tmpl.type == val %}selected{% endif %}>{{ lbl }}</option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Short Description</label>
+            <input type="text" name="description" class="form-control" value="{{ edit_tmpl.description|default:'' }}" placeholder="What is this template for?">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Markdown Content</label>
+            <textarea name="content" class="form-control font-monospace small" rows="8" required placeholder="# Project Title...">{{ edit_tmpl.content|default:'' }}</textarea>
+          </div>
+
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-primary flex-grow-1 fw-semibold">Save Template</button>
+            {% if edit_tmpl %}
+              <a href="/admin-panel/templates/" class="btn btn-outline-secondary">Cancel</a>
+            {% endif %}
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Existing Templates -->
+    <div class="col-lg-7">
+      <div class="card p-4 bg-white shadow-sm border-0">
+        <h5 class="fw-bold mb-3">Existing Templates ({{ templates.count }})</h5>
+        <div class="list-group list-group-flush">
+          {% for t in templates %}
+            <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+              <div>
+                <span class="badge bg-indigo bg-opacity-10 text-indigo mb-1">{{ t.get_type_display }}</span>
+                <h6 class="fw-bold mb-1">{{ t.title }} <small class="text-muted font-monospace">({{ t.slug }})</small></h6>
+                <p class="text-muted small mb-0">{{ t.description }}</p>
+              </div>
+              <div class="d-flex gap-2">
+                <a href="?edit={{ t.id }}" class="btn btn-sm btn-outline-dark">Edit</a>
+                <form method="POST" action="/admin-panel/templates/" onsubmit="return confirm('Delete template?');">
+                  {% csrf_token %}
+                  <input type="hidden" name="action" value="delete">
+                  <input type="hidden" name="tmpl_id" value="{{ t.id }}">
+                  <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                </form>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

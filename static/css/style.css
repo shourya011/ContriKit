@@ -1,0 +1,11 @@
+/*
+ * Legacy entry point — design system lives in modular CSS files.
+ * Kept for backwards compatibility with collectstatic references.
+ */
+@import url('variables.css');
+@import url('base.css');
+@import url('components/navbar.css');
+@import url('components/hero.css');
+@import url('components/cards.css');
+@import url('components/footer.css');
+@import url('responsive.css');

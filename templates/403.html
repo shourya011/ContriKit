@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Access Denied — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app auth-page">
+  <div class="empty-state" style="max-width:560px;margin-inline:auto;">
+    <div class="empty-state-icon" style="color:var(--color-danger);"><i class="bi bi-shield-lock"></i></div>
+    <h1 class="text-section-title">403 — Permission Denied</h1>
+    <p>You do not have permission to access this page. If you need Editor or Admin privileges, check your dashboard or account role.</p>
+    <div class="d-flex justify-content-center gap-2 flex-wrap">
+      <a href="/dashboard/" class="btn btn-primary">Go to Dashboard</a>
+      <a href="/" class="btn btn-secondary">Return Home</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

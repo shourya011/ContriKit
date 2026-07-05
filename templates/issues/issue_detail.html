@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% block title %}{{ issue.title }} — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <nav aria-label="breadcrumb" style="padding-top:32px;margin-bottom:24px;">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/issues/">Issues</a></li>
+      <li class="breadcrumb-item active">{{ issue.title|truncatechars:50 }}</li>
+    </ol>
+  </nav>
+
+  <div class="detail-layout">
+    <div>
+      <article class="detail-card">
+        <div class="d-flex flex-wrap gap-2 align-items-center mb-4">
+          <span class="badge badge-repo"><i class="bi bi-github"></i> {{ issue.repo.name }}</span>
+          {% if issue.difficulty == 'beginner' %}
+            <span class="badge badge-beginner">Beginner Friendly</span>
+          {% else %}
+            <span class="badge badge-intermediate">Intermediate</span>
+          {% endif %}
+          {% if issue.is_featured %}
+            <span class="badge badge-featured">Featured</span>
+          {% endif %}
+          {% if issue.repo.language %}
+            <span class="badge badge-lang">{{ issue.repo.language }}</span>
+          {% endif %}
+          <span class="badge badge-repo"><i class="bi bi-clock"></i> ~{{ issue.estimated_hours }} hours</span>
+          <span class="badge badge-repo"><i class="bi bi-eye"></i> {{ issue.view_count }} views</span>
+        </div>
+
+        <h1 class="text-section-title" style="font-size:2rem;margin-bottom:24px;">{{ issue.title }}</h1>
+
+        {% if issue.tags.all %}
+          <div class="d-flex flex-wrap gap-2 mb-4 pb-4" style="border-bottom:1px solid var(--color-slate-200);">
+            {% for tag in issue.tags.all %}
+              <span class="issue-card__tag" style="background-color:{{ tag.color }};padding:6px 14px;font-size:var(--text-small);">{{ tag.name }}</span>
+            {% endfor %}
+          </div>
+        {% endif %}
+
+        <h2 class="text-card-title mb-3"><i class="bi bi-card-text text-indigo"></i> Context & Description</h2>
+        <div class="text-body" style="white-space:pre-wrap;margin-bottom:32px;">{{ issue.description }}</div>
+
+        <div class="detail-cta">
+          <div>
+            <h3 class="text-card-title" style="font-size:1rem;margin-bottom:4px;">Ready to tackle this issue?</h3>
+            <p class="text-meta mb-0">Claim it on GitHub by commenting that you're working on it via ContribKit!</p>
+          </div>
+          <div class="detail-cta__actions">
+            {% if user.is_authenticated %}
+              <button type="button" class="btn {% if is_saved %}btn-primary{% else %}btn-secondary{% endif %} btn-toggle-save" data-issue-id="{{ issue.id }}">
+                <i class="bi {% if is_saved %}bi-bookmark-fill{% else %}bi-bookmark{% endif %}"></i>
+                {% if is_saved %}Saved{% else %}Save Issue{% endif %}
+              </button>
+            {% else %}
+              <a href="/accounts/login/?next={{ request.path }}" class="btn btn-secondary">
+                <i class="bi bi-bookmark"></i> Save Issue
+              </a>
+            {% endif %}
+            <a href="{{ issue.github_issue_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark">
+              Open on GitHub <i class="bi bi-box-arrow-up-right"></i>
+            </a>
+          </div>
+        </div>
+      </article>
+
+      <article class="detail-card" style="margin-top:24px;">
+        <h2 class="text-card-title mb-2"><i class="bi bi-folder2-open text-indigo"></i> Repository Standard Templates</h2>
+        <p class="text-meta mb-4">Before submitting your Pull Request, review common repository guidelines and markdown templates.</p>
+
+        <div class="row g-3">
+          {% for tmpl in templates %}
+            <div class="col-md-6">
+              <a href="/templates/{{ tmpl.slug }}/" class="d-flex align-items-center justify-content-between p-3 card card-hover text-decoration-none" style="color:inherit;">
+                <div class="d-flex align-items-center gap-2">
+                  <i class="bi bi-file-earmark-code-fill text-indigo fs-5"></i>
+                  <span class="fw-semibold text-meta">{{ tmpl.title }}</span>
+                </div>
+                <span class="badge badge-repo">View →</span>
+              </a>
+            </div>
+          {% endfor %}
+        </div>
+      </article>
+    </div>
+
+    <aside>
+      <div class="detail-sidebar-card">
+        <h2 class="text-card-title mb-4">Repository Details</h2>
+        <div class="mb-4">
+          <span class="text-meta d-block mb-1">Repository</span>
+          <a href="{{ issue.repo.github_url }}" target="_blank" rel="noopener noreferrer" class="text-card-title" style="font-size:1.125rem;color:var(--color-slate-900);">
+            {{ issue.repo.name }} <i class="bi bi-box-arrow-up-right text-meta"></i>
+          </a>
+        </div>
+
+        {% if issue.repo.description %}
+          <div class="mb-4">
+            <span class="text-meta d-block mb-1">Description</span>
+            <p class="text-meta mb-0">{{ issue.repo.description }}</p>
+          </div>
+        {% endif %}
+
+        <div class="row g-2 mb-4">
+          <div class="col-6">
+            <div class="p-3 text-center" style="background:var(--color-slate-50);border-radius:var(--radius-md);">
+              <div class="text-meta">Stars</div>
+              <div class="fw-bold">⭐ {{ issue.repo.stars }}</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="p-3 text-center" style="background:var(--color-slate-50);border-radius:var(--radius-md);">
+              <div class="text-meta">Language</div>
+              <div class="fw-bold">{{ issue.repo.language|default:'N/A' }}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-3 text-meta" style="border-top:1px solid var(--color-slate-200);">
+          Posted by <strong>{{ issue.posted_by.username }}</strong> on {{ issue.created_at|date:"M d, Y" }}
+        </div>
+      </div>
+
+      <div class="detail-sidebar-card" style="background:var(--color-slate-900);border-color:var(--color-slate-800);">
+        <h3 class="text-card-title mb-2" style="color:var(--color-primary-light);font-size:1rem;">
+          <i class="bi bi-terminal"></i> First Time Contributing?
+        </h3>
+        <p class="text-meta mb-4" style="color:var(--color-slate-400);">Need help cloning, creating a branch, or writing your commit message?</p>
+        <a href="/cheatsheet/" class="btn btn-secondary w-100">
+          Open Git Cheat Sheet <i class="bi bi-arrow-right"></i>
+        </a>
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,353 @@
+{% extends 'base.html' %}
+{% block title %}ContribKit — Bridge to Open Source{% endblock %}
+
+{% block content %}
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero__bg">
+    <div class="hero__grid"></div>
+    <div class="hero__glow hero__glow--primary"></div>
+    <div class="hero__glow hero__glow--secondary"></div>
+  </div>
+
+  <div class="container-app">
+    <div class="hero__layout">
+      <!-- Left column -->
+      <div class="hero__content">
+        <span class="hero__eyebrow">
+          <i class="bi bi-stars"></i> Open Source Contribution Bridge
+        </span>
+        <h1 class="hero__title">
+          Your First Pull Request <span class="text-gradient">Starts Here</span>
+        </h1>
+        <p class="hero__desc">
+          Don't get lost in massive codebases. ContribKit connects beginners with structured opportunities enriched with copy-paste templates, step-by-step guides, and interactive Git workflows.
+        </p>
+        <div class="hero__actions">
+          <a href="/issues/" class="btn btn-primary btn-lg">
+            <i class="bi bi-search"></i> Find Beginner Issues
+          </a>
+          <a href="/templates/" class="btn btn-secondary btn-lg">
+            <i class="bi bi-folder2-open"></i> Explore Templates
+          </a>
+        </div>
+        <div class="hero__stats">
+          <div>
+            <div class="hero__stat-value">{{ issue_count }}</div>
+            <div class="hero__stat-label">Open Issues</div>
+          </div>
+          <div>
+            <div class="hero__stat-value">{{ template_count }}</div>
+            <div class="hero__stat-label">Repo Templates</div>
+          </div>
+          <div>
+            <div class="hero__stat-value">{{ repo_count }}</div>
+            <div class="hero__stat-label">Active Repos</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right column -->
+      <div class="hero__visual">
+        <div class="hero__code-window">
+          <div class="hero__code-header">
+            <span class="hero__code-dot hero__code-dot--red"></span>
+            <span class="hero__code-dot hero__code-dot--yellow"></span>
+            <span class="hero__code-dot hero__code-dot--green"></span>
+            <span class="hero__code-title">contrib-workflow.sh</span>
+          </div>
+          <div class="hero__code-body">
+            <span class="cm"># Your first contribution</span><br>
+            <span class="fn">git</span> clone https://github.com/org/repo<br>
+            <span class="fn">git</span> checkout -b <span class="str">fix/beginner-issue</span><br>
+            <span class="cm"># Make your changes...</span><br>
+            <span class="fn">git</span> add . && <span class="fn">git</span> commit -m <span class="str">"fix: resolve issue"</span><br>
+            <span class="fn">git</span> push origin <span class="str">fix/beginner-issue</span><br>
+            <span class="cm"># Open PR on GitHub ✨</span>
+          </div>
+        </div>
+
+        <div class="hero__contrib-graph">
+          <div class="hero__contrib-label">
+            <i class="bi bi-github"></i> Contribution Activity
+          </div>
+          <div class="hero__contrib-grid">
+            {% for i in "01234567890123456789012345" %}
+              <div class="hero__contrib-cell hero__contrib-cell--{% cycle '1' '2' '3' '4' '2' '1' '3' '4' '2' '0' '1' '3' '4' '2' '1' '0' '3' '4' '2' '1' '3' '0' '4' '2' '1' '3' %}"></div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="hero__repo-card hero__repo-card--1">
+          <span class="hero__repo-icon"><i class="bi bi-bookmark-star"></i></span>
+          <div>
+            <div class="hero__repo-name">good-first-issue</div>
+            <div class="hero__repo-meta">Beginner · ~2h est.</div>
+          </div>
+        </div>
+
+        <div class="hero__repo-card hero__repo-card--2">
+          <span class="hero__repo-icon"><i class="bi bi-git"></i></span>
+          <div>
+            <div class="hero__repo-name">CONTRIBUTING.md</div>
+            <div class="hero__repo-meta">Template ready</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="section">
+  <div class="container-app">
+    <div class="section-header text-center" style="max-width:640px;margin-inline:auto;text-align:center;">
+      <span class="section-eyebrow"><i class="bi bi-lightning-fill"></i> Why ContribKit</span>
+      <h2 class="text-section-title">Everything you need to contribute confidently</h2>
+      <p class="text-body" style="margin-top:12px;">Built for beginners, trusted by maintainers. No more guessing where to start.</p>
+    </div>
+
+    <div class="features-grid">
+      <article class="feature-card">
+        <div class="feature-card__icon"><i class="bi bi-seedling"></i></div>
+        <h3 class="feature-card__title">Beginner Friendly</h3>
+        <p class="feature-card__desc">Every issue is tagged by difficulty with estimated hours, so you know exactly what you're signing up for before you start.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-card__icon"><i class="bi bi-collection"></i></div>
+        <h3 class="feature-card__title">Curated Repositories</h3>
+        <p class="feature-card__desc">Hand-picked open source projects actively looking for first-time contributors, with full context and maintainer guidance.</p>
+      </article>
+      <article class="feature-card">
+        <div class="feature-card__icon"><i class="bi bi-map"></i></div>
+        <h3 class="feature-card__title">Step-by-Step Guides</h3>
+        <p class="feature-card__desc">Copy-paste templates, contribution guides, and an interactive Git cheat sheet to walk you through every step.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ISSUE BOARD PREVIEW ═══ -->
+<section class="section" style="background:var(--color-white);border-block:1px solid var(--color-slate-200);">
+  <div class="container-app">
+    <div class="section-header section-header--row">
+      <div>
+        <span class="section-eyebrow"><i class="bi bi-grid-3x3-gap"></i> Issue Board</span>
+        <h2 class="text-section-title">Beginner-friendly issues</h2>
+        <p class="text-body" style="margin-top:8px;">Hand-picked opportunities ready for first-time contributors</p>
+      </div>
+      <a href="/issues/" class="btn btn-secondary">View All Issues <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    {% if featured_issues %}
+      <div class="issues-grid">
+        {% for issue in featured_issues %}
+          <article class="issue-card card-hover {% if issue.is_featured %}is-featured{% endif %}">
+            <div class="issue-card__header">
+              <span class="badge badge-repo">{{ issue.repo.name }}</span>
+              <div class="issue-card__badges">
+                {% if issue.is_featured %}
+                  <span class="badge badge-featured">Featured</span>
+                {% endif %}
+                {% if issue.difficulty == 'beginner' %}
+                  <span class="badge badge-beginner">Beginner</span>
+                {% else %}
+                  <span class="badge badge-intermediate">Intermediate</span>
+                {% endif %}
+                {% if issue.repo.language %}
+                  <span class="badge badge-lang">{{ issue.repo.language }}</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <h3 class="issue-card__title">
+              <a href="/issues/{{ issue.id }}/">{{ issue.title }}</a>
+            </h3>
+
+            <p class="issue-card__desc">{{ issue.description }}</p>
+
+            <div class="issue-card__footer">
+              <span class="issue-card__meta"><i class="bi bi-clock"></i> ~{{ issue.estimated_hours }}h</span>
+              <div class="issue-card__actions">
+                {% if user.is_authenticated %}
+                  {% if issue.id in saved_ids %}
+                    <button type="button" class="btn btn-primary btn-sm btn-icon btn-toggle-save" data-issue-id="{{ issue.id }}" title="Saved">
+                      <i class="bi bi-bookmark-fill"></i>
+                    </button>
+                  {% else %}
+                    <button type="button" class="btn btn-secondary btn-sm btn-icon btn-toggle-save" data-issue-id="{{ issue.id }}" title="Save issue">
+                      <i class="bi bi-bookmark"></i>
+                    </button>
+                  {% endif %}
+                {% else %}
+                  <a href="/accounts/login/?next=/" class="btn btn-secondary btn-sm btn-icon" title="Save issue">
+                    <i class="bi bi-bookmark"></i>
+                  </a>
+                {% endif %}
+                <a href="{{ issue.github_issue_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark btn-sm btn-icon" title="Open on GitHub">
+                  <i class="bi bi-github"></i>
+                </a>
+              </div>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-inbox"></i></div>
+        <h4>No issues posted yet</h4>
+        <p>Maintainers are currently preparing new opportunities. Check back soon!</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ═══ TEMPLATES ═══ -->
+<section class="section">
+  <div class="container-app">
+    <div class="section-header section-header--row">
+      <div>
+        <span class="section-eyebrow"><i class="bi bi-file-earmark-code"></i> Templates</span>
+        <h2 class="text-section-title">Repository template library</h2>
+        <p class="text-body" style="margin-top:8px;">Copy-paste-ready markdown for contribution guidelines and community standards</p>
+      </div>
+      <a href="/templates/" class="btn btn-secondary">Browse All Templates <i class="bi bi-arrow-right"></i></a>
+    </div>
+
+    {% if featured_templates %}
+      <div class="templates-grid">
+        {% for tmpl in featured_templates %}
+          <article class="template-card card-hover">
+            <div class="template-card__header">
+              <span class="template-card__type">{{ tmpl.get_type_display }}</span>
+              <i class="bi bi-file-earmark-code template-card__icon"></i>
+            </div>
+            <h3 class="template-card__title">
+              <a href="/templates/{{ tmpl.slug }}/">{{ tmpl.title }}</a>
+            </h3>
+            <p class="template-card__desc">{{ tmpl.description }}</p>
+            <div class="template-card__preview">{{ tmpl.content|slice:":200" }}</div>
+            <div class="template-card__footer">
+              <a href="/templates/{{ tmpl.slug }}/" class="btn btn-ghost btn-sm">View Template <i class="bi bi-arrow-right"></i></a>
+              <button type="button" class="btn btn-primary btn-sm btn-copy" data-clipboard-text="{{ tmpl.content }}">
+                <i class="bi bi-clipboard"></i> Copy
+              </button>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-state-icon"><i class="bi bi-folder2-open"></i></div>
+        <h4>No templates yet</h4>
+        <p>Run <code>python manage.py seed_data</code> to populate the template library.</p>
+        <a href="/templates/" class="btn btn-primary">View Template Library</a>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- ═══ GIT CHEAT SHEET TEASER ═══ -->
+<section class="section" style="background:var(--color-slate-900);">
+  <div class="container-app">
+    <div class="about-grid">
+      <div>
+        <span class="section-eyebrow" style="background:rgba(99,102,241,0.15);border-color:rgba(99,102,241,0.3);">
+          <i class="bi bi-terminal"></i> Git Cheat Sheet
+        </span>
+        <h2 class="text-section-title" style="color:var(--color-white);">Master Git in minutes</h2>
+        <p class="text-body" style="color:var(--color-slate-400);margin-top:12px;">
+          30+ searchable commands covering clone, branch, commit, push, and undo workflows. One-click copy for every command.
+        </p>
+        <ul class="about-list">
+          <li><i class="bi bi-check-circle-fill"></i> Instant search across all commands and descriptions</li>
+          <li><i class="bi bi-check-circle-fill"></i> Syntax-highlighted code blocks with copy buttons</li>
+          <li><i class="bi bi-check-circle-fill"></i> Real-world examples for every workflow</li>
+        </ul>
+        <a href="/cheatsheet/" class="btn btn-primary btn-lg" style="margin-top:32px;">
+          <i class="bi bi-terminal"></i> Open Cheat Sheet
+        </a>
+      </div>
+      <div>
+        <div class="cheat-card" style="margin-bottom:16px;">
+          <p class="cheat-card__desc">Clone a repository</p>
+          <div class="cheat-card__code">
+            <code>git clone &lt;url&gt;</code>
+            <button type="button" class="btn btn-ghost btn-sm btn-copy" data-clipboard-text="git clone &lt;url&gt;" style="color:var(--color-slate-400);">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+        </div>
+        <div class="cheat-card">
+          <p class="cheat-card__desc">Create and switch branch</p>
+          <div class="cheat-card__code">
+            <code>git checkout -b feature/name</code>
+            <button type="button" class="btn btn-ghost btn-sm btn-copy" data-clipboard-text="git checkout -b feature/name" style="color:var(--color-slate-400);">
+              <i class="bi bi-clipboard"></i>
+            </button>
+          </div>
+          <div class="cheat-card__example"><strong>Example:</strong> git checkout -b fix/login-bug</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ ABOUT ═══ -->
+<section class="section" id="about">
+  <div class="container-app">
+    <div class="about-grid">
+      <div>
+        <span class="section-eyebrow"><i class="bi bi-info-circle"></i> About</span>
+        <h2 class="text-section-title">Built for the next generation of open source contributors</h2>
+        <p class="text-body" style="margin-top:16px;">
+          ContribKit bridges the gap between curious beginners and welcoming maintainers. We believe everyone deserves a clear path to their first merged pull request.
+        </p>
+        <ul class="about-list">
+          <li><i class="bi bi-check2"></i> Structured issues with difficulty ratings and time estimates</li>
+          <li><i class="bi bi-check2"></i> Standardized repository templates for consistent onboarding</li>
+          <li><i class="bi bi-check2"></i> Interactive Git workflows with searchable cheat sheets</li>
+          <li><i class="bi bi-check2"></i> Maintainer tools for posting, moderating, and analytics</li>
+        </ul>
+      </div>
+      <div class="about-visual">
+        <h3 class="text-card-title" style="margin-bottom:8px;">Platform at a glance</h3>
+        <p class="text-meta">Live stats from the ContribKit community</p>
+        <div class="about-stat-row">
+          <div class="about-stat">
+            <div class="about-stat__value">{{ issue_count }}</div>
+            <div class="about-stat__label">Open Issues</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat__value">{{ template_count }}</div>
+            <div class="about-stat__label">Templates</div>
+          </div>
+          <div class="about-stat">
+            <div class="about-stat__value">{{ repo_count }}</div>
+            <div class="about-stat__label">Repositories</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+{% if not user.is_authenticated %}
+<section class="section" style="padding-top:0;">
+  <div class="container-app">
+    <div class="cta-banner">
+      <div class="cta-banner__content">
+        <h2 class="cta-banner__title">Are you an open source maintainer?</h2>
+        <p class="cta-banner__desc">Post issues, share template files, and grow your contributor community effortlessly with GitHub URL auto-fill.</p>
+        <a href="/accounts/signup/" class="btn btn-primary btn-lg">
+          <i class="bi bi-rocket-takeoff"></i> Start Posting Issues
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

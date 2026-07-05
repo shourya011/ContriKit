@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Template Library — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container-app">
+  <header class="page-header text-center" style="max-width:680px;margin-inline:auto;text-align:center;">
+    <span class="section-eyebrow"><i class="bi bi-file-earmark-code"></i> Template Library</span>
+    <h1 class="page-header__title">Repository Template Library</h1>
+    <p class="page-header__desc" style="margin-inline:auto;">Copy-paste-ready markdown templates standardizing contribution guidelines, issue reporting, and community conduct.</p>
+  </header>
+
+  {% if templates %}
+    <div class="templates-grid" style="padding-bottom:64px;">
+      {% for tmpl in templates %}
+        <article class="template-card card-hover">
+          <div class="template-card__header">
+            <span class="template-card__type">{{ tmpl.get_type_display }}</span>
+            <i class="bi bi-file-earmark-code template-card__icon"></i>
+          </div>
+
+          <h2 class="template-card__title">
+            <a href="/templates/{{ tmpl.slug }}/">{{ tmpl.title }}</a>
+          </h2>
+          <p class="template-card__desc">{{ tmpl.description }}</p>
+
+          <div class="template-card__preview">{{ tmpl.content|slice:":250" }}</div>
+
+          <div class="template-card__footer">
+            <a href="/templates/{{ tmpl.slug }}/" class="btn btn-ghost btn-sm">View Full Template <i class="bi bi-arrow-right"></i></a>
+            <button type="button" class="btn btn-primary btn-sm btn-copy" data-clipboard-text="{{ tmpl.content }}">
+              <i class="bi bi-clipboard"></i> Copy
+            </button>
+          </div>
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-state-icon"><i class="bi bi-folder2-open"></i></div>
+      <h4>No templates seeded yet</h4>
+      <p>Run <code>python manage.py seed_data</code> to populate the 5 core repository markdown templates.</p>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

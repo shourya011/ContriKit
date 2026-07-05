@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% block title %}Moderate Issues — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-danger mb-1"><i class="bi bi-shield-lock-fill me-1"></i>Platform Admin</span>
+      <h2 class="fw-bold mb-0">Issue Moderation & Featuring</h2>
+    </div>
+    <a href="/admin-panel/templates/" class="btn btn-outline-secondary btn-sm">Template Library →</a>
+  </div>
+
+  <div class="card bg-white shadow-sm border-0 p-4">
+    {% if issues %}
+      <div class="table-responsive">
+        <table class="table table-hover align-middle">
+          <thead class="table-light small text-muted text-uppercase">
+            <tr>
+              <th>Title</th>
+              <th>Repo</th>
+              <th>Posted By</th>
+              <th>Status</th>
+              <th>Featured</th>
+              <th class="text-end">Moderation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for issue in issues %}
+              <tr {% if issue.is_featured %}class="table-indigo bg-indigo bg-opacity-10"{% endif %}>
+                <td>
+                  <a href="/issues/{{ issue.id }}/" target="_blank" class="fw-bold text-dark text-decoration-none">{{ issue.title }} ↗</a>
+                </td>
+                <td><span class="badge bg-secondary bg-opacity-10 text-dark">{{ issue.repo.name }}</span></td>
+                <td>{{ issue.posted_by.username }}</td>
+                <td><span class="badge {% if issue.status == 'open' %}bg-success{% else %}bg-secondary{% endif %}">{{ issue.status }}</span></td>
+                <td>
+                  <form method="POST" action="/admin-panel/issues/">
+                    {% csrf_token %}
+                    <input type="hidden" name="issue_id" value="{{ issue.id }}">
+                    <input type="hidden" name="action" value="toggle_featured">
+                    <button type="submit" class="btn btn-sm {% if issue.is_featured %}btn-indigo text-white{% else %}btn-outline-secondary{% endif %}">
+                      {% if issue.is_featured %}⭐ Featured{% else %}Feature It{% endif %}
+                    </button>
+                  </form>
+                </td>
+                <td class="text-end">
+                  <form method="POST" action="/admin-panel/issues/" onsubmit="return confirm('Remove this issue from the platform?');">
+                    {% csrf_token %}
+                    <input type="hidden" name="issue_id" value="{{ issue.id }}">
+                    <input type="hidden" name="action" value="delete">
+                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                      <i class="bi bi-trash me-1"></i>Remove
+                    </button>
+                  </form>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p class="text-muted small mb-0">No issues posted on platform.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

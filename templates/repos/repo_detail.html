@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ repo.name }} — Repository Settings{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2 class="fw-bold mb-1">{{ repo.name }}</h2>
+      <a href="{{ repo.github_url }}" target="_blank" class="small text-muted text-decoration-none">{{ repo.github_url }} ↗</a>
+    </div>
+    <a href="/editor/repos/" class="btn btn-outline-secondary btn-sm">← Back to Repos</a>
+  </div>
+
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card p-4 shadow-sm border-0 bg-white">
+        <h6 class="fw-bold text-muted mb-3">Quick Actions</h6>
+        <div class="d-flex flex-column gap-2">
+          <a href="/editor/issues/create/" class="btn btn-primary btn-sm fw-semibold">Post Issue for Repo</a>
+          <a href="/editor/issues/import/?repo_id={{ repo.id }}" class="btn btn-outline-primary btn-sm fw-semibold">Bulk Import GitHub Issues</a>
+          
+          <form method="POST" action="/editor/repos/{{ repo.id }}/" class="mt-2">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="toggle_active">
+            <button type="submit" class="btn btn-sm btn-outline-secondary w-100">
+              {% if repo.is_active %}Deactivate Repo{% else %}Activate Repo{% endif %}
+            </button>
+          </form>
+
+          <form method="POST" action="/editor/repos/{{ repo.id }}/" onsubmit="return confirm('Delete this repository and all its posted issues?');">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete">
+            <button type="submit" class="btn btn-sm btn-outline-danger w-100">Delete Repository</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-8">
+      <div class="card p-4 shadow-sm border-0 bg-white">
+        <h5 class="fw-bold mb-3">Posted Opportunities ({{ issues.count }})</h5>
+        {% if issues %}
+          <div class="list-group list-group-flush">
+            {% for issue in issues %}
+              <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
+                <div>
+                  <h6 class="fw-bold mb-1"><a href="/issues/{{ issue.id }}/" class="text-dark text-decoration-none">{{ issue.title }}</a></h6>
+                  <div class="small text-muted">
+                    <span class="badge {% if issue.status == 'open' %}bg-success{% else %}bg-secondary{% endif %} me-2">{{ issue.status }}</span>
+                    <span>{{ issue.difficulty }} • ~{{ issue.estimated_hours }}h • {{ issue.view_count }} views</span>
+                  </div>
+                </div>
+                <a href="/editor/issues/edit/{{ issue.id }}/" class="btn btn-sm btn-outline-dark">Edit</a>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="empty-state py-4 my-2">
+            <p class="text-muted small mb-0">No issues posted for this repository yet.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

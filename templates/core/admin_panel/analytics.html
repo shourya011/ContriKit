@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Platform Stats — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-danger mb-1"><i class="bi bi-shield-lock-fill me-1"></i>Platform Admin</span>
+      <h2 class="fw-bold mb-0">Platform-Wide Analytics</h2>
+    </div>
+    <a href="/admin-panel/users/" class="btn btn-outline-secondary btn-sm">Users Panel →</a>
+  </div>
+
+  <div class="row g-4 mb-5 text-center">
+    <div class="col-6 col-md-3">
+      <div class="card p-4 bg-white shadow-sm border-0 h-100">
+        <div class="fs-1 fw-bold text-indigo">{{ total_users }}</div>
+        <h6 class="text-muted mb-0 small">Total Accounts</h6>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-4 bg-white shadow-sm border-0 h-100">
+        <div class="fs-1 fw-bold text-indigo">{{ total_issues }}</div>
+        <h6 class="text-muted mb-0 small">Total Issues</h6>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-4 bg-white shadow-sm border-0 h-100">
+        <div class="fs-1 fw-bold text-indigo">{{ total_repos }}</div>
+        <h6 class="text-muted mb-0 small">Linked Repositories</h6>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="card p-4 bg-white shadow-sm border-0 h-100">
+        <div class="fs-1 fw-bold text-indigo">{{ total_templates }}</div>
+        <h6 class="text-muted mb-0 small">Template Files</h6>
+      </div>
+    </div>
+  </div>
+
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card p-4 bg-white shadow-sm border-0 text-center">
+        <h5 class="fw-bold mb-4">User Role Distribution</h5>
+        <div class="mx-auto" style="max-width: 320px;">
+          <canvas id="rolePieChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{{ pie_labels|json_script:"pieLabels" }}
+{{ pie_data|json_script:"pieData" }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const labelsEl = document.getElementById('pieLabels');
+  const dataEl = document.getElementById('pieData');
+  if (labelsEl && dataEl) {
+    const labels = JSON.parse(labelsEl.textContent);
+    const data = JSON.parse(dataEl.textContent);
+
+    if (labels.length > 0) {
+      const ctx = document.getElementById('rolePieChart').getContext('2d');
+      new Chart(ctx, {
+        type: 'pie',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: data,
+            backgroundColor: ['#64748b', '#6366f1', '#ef4444'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { position: 'bottom' }
+          }
+        }
+      });
+    }
+  }
+});
+</script>
+{% endblock %}

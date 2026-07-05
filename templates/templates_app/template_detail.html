@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}{{ template.title }} — ContribKit Templates{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <header class="page-header">
+    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
+      <div>
+        <span class="template-card__type">{{ template.get_type_display }}</span>
+        <h1 class="page-header__title" style="margin-top:12px;">{{ template.title }}</h1>
+        <p class="page-header__desc">{{ template.description }}</p>
+      </div>
+      <div class="d-flex gap-2">
+        <a href="/templates/" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Library</a>
+        <button type="button" class="btn btn-primary btn-sm btn-copy" data-clipboard-text="{{ template.content }}">
+          <i class="bi bi-clipboard"></i> Copy Raw Markdown
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="card" style="background:var(--color-slate-900);border-color:var(--color-slate-800);padding:32px;border-radius:var(--radius-xl);position:relative;">
+    <div class="d-flex justify-content-between align-items-center pb-3 mb-3" style="border-bottom:1px solid rgba(255,255,255,0.08);font-family:var(--font-mono);font-size:var(--text-small);color:var(--color-slate-500);">
+      <span>File: {{ template.title }}</span>
+      <span>Markdown</span>
+    </div>
+    <pre class="mb-0" style="color:var(--color-slate-200);font-family:var(--font-mono);font-size:0.875rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin:0;">{{ template.content }}</pre>
+  </div>
+</div>
+{% endblock %}
