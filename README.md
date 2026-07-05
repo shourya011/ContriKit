@@ -1,11 +1,11 @@
-# 🚀 ContribKit — Open Source Contribution Bridge
+# ContribKit — Open Source Contribution Bridge
 
 > **The bridge between open-source maintainers and first-time contributors.**  
 > Built with Django 5/6, Bootstrap 5, WhiteNoise, and PythonAnywhere WSGI serving.
 
 ---
 
-## 🌟 Product Overview
+## Product Overview
 
 **ContribKit** solves the hardest part of open source: beginner onboarding. Maintainers ("Editors") post structured contribution opportunities enriched with copy-paste repository standard templates, estimated hours, difficulty tags, and direct GitHub links. Beginners ("Viewers") discover curated starter issues without getting lost in massive unfamiliar codebases.
 
@@ -23,7 +23,7 @@
 
 ---
 
-## 📸 Platform Screens & Walkthrough
+## Platform Screens & Walkthrough
 
 - **Landing Page (`/`)**: High-impact hero CTA, live aggregated database counts (Issues, Templates, Active Repos), and featured opportunities grid.
 - **Maintainer Hub (`/dashboard/` & `/editor/repos/`)**: Role switching badges, AJAX bookmark previews, and instant GitHub URL validation.
@@ -31,7 +31,7 @@
 
 ---
 
-## 🔑 Live Demo Credentials
+## Live Demo Credentials
 
 Test the platform instantly without creating a new account:
 
@@ -43,7 +43,7 @@ Test the platform instantly without creating a new account:
 
 ---
 
-## 💻 Local Development Setup
+## Local Development Setup
 
 1. **Clone & Virtual Environment**
    ```bash
@@ -80,7 +80,7 @@ Test the platform instantly without creating a new account:
 
 ---
 
-## ☁️ PythonAnywhere Deployment Instructions (Exact Guide)
+## PythonAnywhere Deployment Instructions (Exact Guide)
 
 ContribKit is configured explicitly for **PythonAnywhere** production hosting (Free or Paid tier). Unlike Heroku or Railway, PythonAnywhere uses standard WSGI configuration files and built-in static file mappings.
 
@@ -157,7 +157,7 @@ Verify the deployment checklist:
 
 ---
 
-## 🛠 Tech Stack & Architecture
+## Tech Stack & Architecture
 - **Framework**: Django 5.x / 6.x (Modular split settings `base.py`, `dev.py`, `prod.py`)
 - **Frontend**: Bootstrap 5, Bootstrap Icons, Chart.js, Vanilla JS
 - **Static Storage**: WhiteNoise CompressedManifestStaticFilesStorage
