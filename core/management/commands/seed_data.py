@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from accounts.models import User
 from repos.models import Repo
@@ -146,144 +147,32 @@ class Command(BaseCommand):
             SavedIssue.objects.get_or_create(user=viewer_user, issue=first_issue)
             SavedIssue.objects.get_or_create(user=viewer_user, issue=last_issue)
 
-        # 5. Create Templates
-        templates_data = [
-            ("README.md Standard Template", "readme", "readme", "Comprehensive README with shields, installation steps, and usage guide.",
-             """# Project Name
+        # 5. Create Templates (loaded from JSON seed data)
+        import json, os
+        from django.conf import settings
 
-[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+        json_path = os.path.join(settings.BASE_DIR, 'templates_app', 'data', 'seed_data.json')
 
-> A brief, catchy one-line description of what your open source project does.
+        if os.path.exists(json_path):
+            with open(json_path) as f:
+                templates_data = json.load(f)
 
-## 📖 Table of Contents
-- [Features](#features)
-- [Quick Start](#quick-start)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
+            count = 0
+            for tmpl in templates_data:
+                Template.objects.update_or_create(slug=tmpl['slug'], defaults={
+                    'title': tmpl['title'],
+                    'category': tmpl['category'],
+                    'description': tmpl['description'],
+                    'content': tmpl['content'],
+                    'tags': tmpl.get('tags', ''),
+                    'created_by': admin_user
+                })
+                count += 1
 
-## ✨ Features
-- **Fast & Lightweight** — Zero bloat dependencies.
-- **Easy Integration** — Works out of the box in 5 minutes.
-- **Accessible** — Fully WCAG 2.1 AA compliant.
+            self.stdout.write(self.style.SUCCESS(f"✓ {count} Templates seeded from JSON seed data"))
+        else:
+            self.stdout.write(self.style.WARNING(f"Seed data JSON not found at {json_path}"))
 
-## 🚀 Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/username/project.git
-cd project
-
-# Install dependencies
-npm install  # or pip install -r requirements.txt
-
-# Run local dev server
-npm run dev
-```
-
-## 🤝 Contributing
-We love community contributions! Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
-
-## 📄 License
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details."""),
-
-            ("CONTRIBUTING.md Guide", "contributing", "contributing", "Clear onboarding rules, Git workflow instructions, and dev setup.",
-             """# Contributing Guidelines
-
-First off, thank you for considering contributing to this project! It's people like you that make open source such a welcoming community.
-
-## 🛠 Getting Started
-1. **Fork** the repository on GitHub.
-2. **Clone** your fork locally: `git clone https://github.com/YOUR_USER/repo.git`
-3. **Create a branch** for your work: `git checkout -b feature/my-new-feature`
-4. **Make your changes** and verify local tests pass.
-
-## 📐 Coding Standards
-- Write clean, self-documenting code.
-- Add unit tests for any new logic or bug fixes.
-- Ensure no trailing whitespace or lint errors exist.
-
-## 📬 Submitting a Pull Request
-- Reference the issue number in your PR title (e.g. `Fix #123: Correct header spacing`).
-- Describe the changes clearly and include screenshots for UI modifications.
-- Request a review from maintainers when ready!"""),
-
-            ("Issue Report Template", "issue_tmpl", "issue_tmpl", "Structured bug report and feature request template.",
-             """---
-name: Bug Report or Feature Request
-about: Create a clear and actionable issue for maintainers
-title: "[ISSUE]: "
-labels: needs-triage
-assignees: ''
----
-
-## 🐛 Bug Description / 💡 Feature Idea
-*A clear and concise description of what the bug is or what feature you are proposing.*
-
-## 🔄 Steps to Reproduce (if bug)
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
-
-## 🖥 Expected Behavior
-*A clear description of what you expected to happen.*
-
-## 📸 Screenshots / Logs
-*If applicable, paste terminal output or UI screenshots to help explain your problem.*
-
-## ⚙️ Environment
-- OS: [e.g. macOS 14, Ubuntu 22.04]
-- Python/Node Version: [e.g. Python 3.12, Node 20]
-- Version: [e.g. 1.2.0]"""),
-
-            ("Pull Request Template", "pr_tmpl", "pr_tmpl", "Standard PR checklist ensuring tests and documentation are complete.",
-             """## 🔗 Related Issue
-Fixes #(issue number)
-
-## 📝 Summary of Changes
-- *Added X to handle Y*
-- *Updated helper logic in Z*
-
-## ✅ Contributor Checklist
-- [ ] My code follows the code style guidelines of this repository.
-- [ ] I have performed a self-review of my own code.
-- [ ] I have commented my code in hard-to-understand areas.
-- [ ] I have added tests that prove my fix is effective or that my feature works.
-- [ ] New and existing unit tests pass locally with my changes.
-
-## 📸 Screenshots (if UI change)
-*Paste before/after comparisons here.*"""),
-
-            ("Code of Conduct", "code_of_conduct", "code_of_conduct", "Contributor Covenant standardizing community behavior and safety.",
-             """# Contributor Covenant Code of Conduct
-
-## Our Pledge
-We as members, contributors, and leaders pledge to make participation in our community a harassment-free experience for everyone, regardless of age, body size, visible or invisible disability, ethnicity, sex characteristics, gender identity and expression, level of experience, education, socio-economic status, nationality, personal appearance, race, religion, or sexual identity and orientation.
-
-## Our Standards
-Examples of behavior that contributes to a positive environment:
-- Demonstrating empathy and kindness toward other people
-- Being respectful of differing opinions, viewpoints, and experiences
-- Giving and gracefully accepting constructive feedback
-- Focusing on what is best not just for us as individuals, but for the overall community
-
-## Enforcement
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported to the community leaders. All complaints will be reviewed and investigated promptly and fairly.""")
-        ]
-
-        for title, slug, t_type, desc, content in templates_data:
-            Template.objects.update_or_create(slug=slug, defaults={
-                "title": title,
-                "type": t_type,
-                "description": desc,
-                "content": content,
-                "created_by": admin_user
-            })
-
-        self.stdout.write(self.style.SUCCESS("✓ 5 Standard Templates seeded"))
 
         # 6. Create CheatSheet Sections & Commands
         sections_data = [

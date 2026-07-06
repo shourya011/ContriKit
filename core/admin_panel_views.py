@@ -52,7 +52,7 @@ def admin_issues_view(request):
 
 @admin_required
 def admin_templates_view(request):
-    templates = Template.objects.all().order_by('type')
+    templates = Template.objects.all().order_by('category')
     if request.method == 'POST':
         tmpl_id = request.POST.get('tmpl_id')
         action = request.POST.get('action')
@@ -93,7 +93,7 @@ def admin_templates_view(request):
 
     return render(request, 'core/admin_panel/templates.html', {
         'templates': templates,
-        'type_choices': Template.TYPE_CHOICES,
+        'categories': Template.CATEGORY_CHOICES,
         'edit_tmpl': edit_tmpl
     })
 

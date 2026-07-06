@@ -1,30 +1,181 @@
 {% extends 'base.html' %}
 {% block title %}{{ template.title }} — ContribKit Templates{% endblock %}
 
-{% block content %}
-<div class="container-app" style="padding-bottom:64px;">
-  <header class="page-header">
-    <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
-      <div>
-        <span class="template-card__type">{{ template.get_type_display }}</span>
-        <h1 class="page-header__title" style="margin-top:12px;">{{ template.title }}</h1>
-        <p class="page-header__desc">{{ template.description }}</p>
-      </div>
-      <div class="d-flex gap-2">
-        <a href="/templates/" class="btn btn-secondary btn-sm"><i class="bi bi-arrow-left"></i> Back to Library</a>
-        <button type="button" class="btn btn-primary btn-sm btn-copy" data-clipboard-text="{{ template.content }}">
-          <i class="bi bi-clipboard"></i> Copy Raw Markdown
-        </button>
-      </div>
-    </div>
-  </header>
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<style>
+  pre {
+  background: #212529;
+  border-radius: 0.5rem;
+  padding: 1.5rem !important;
+  margin: 0;
+}
+pre code.hljs {
+  overflow-x: auto;
+  background: transparent; /* avoid double background from .hljs */
+}
+</style>
+{% endblock %}
 
-  <div class="card" style="background:var(--color-slate-900);border-color:var(--color-slate-800);padding:32px;border-radius:var(--radius-xl);position:relative;">
-    <div class="d-flex justify-content-between align-items-center pb-3 mb-3" style="border-bottom:1px solid rgba(255,255,255,0.08);font-family:var(--font-mono);font-size:var(--text-small);color:var(--color-slate-500);">
-      <span>File: {{ template.title }}</span>
-      <span>Markdown</span>
+{% block content %}
+<div class="container py-4">
+  <!-- Breadcrumb -->
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/templates/" class="text-decoration-none">Template Library</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ template.title }}</li>
+    </ol>
+  </nav>
+
+  <div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+      <!-- Header -->
+      <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+        <div>
+          <span class="badge bg-indigo bg-opacity-10 text-indigo fw-semibold mb-2">{{ template.get_category_display }}</span>
+          <h2 class="fw-bold mb-1">{{ template.title }}</h2>
+          <p class="text-muted mb-0">{{ template.description }}</p>
+          {% if template.tag_list %}
+            <div class="d-flex flex-wrap gap-1 mt-2">
+              {% for tag in template.tag_list %}
+                <span class="badge bg-light text-dark border small fw-normal">{{ tag }}</span>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="d-flex gap-2 flex-shrink-0">
+          <a href="/templates/" class="btn btn-outline-secondary btn-sm fw-semibold">← Back</a>
+          <button type="button" class="btn btn-primary btn-sm px-4 fw-semibold btn-copy" data-clipboard-text="{{ template.content }}">
+            <i class="bi bi-clipboard me-1"></i>Copy
+          </button>
+          <button type="button" class="btn btn-outline-dark btn-sm px-3 fw-semibold" id="downloadBtn">
+            <i class="bi bi-download me-1"></i>Download
+          </button>
+        </div>
+      </div>
+
+      <!-- Template Content with Syntax Highlighting -->
+      <div class="card shadow-sm border-0 bg-dark text-light rounded-3 position-relative overflow-hidden">
+        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom border-secondary border-opacity-25 small text-muted font-monospace">
+          <span><i class="bi bi-file-earmark me-1"></i>{{ template.title }}</span>
+          <span class="d-flex align-items-center gap-3">
+            <span>{{ template.tag_list|first|default:"Markdown" }}</span>
+            <span>{{ template.content|length }} chars</span>
+          </span>
+        </div>
+        <pre class="mb-0"><code class="language-markdown">{{ template.content }}</code></pre>
+      </div>
     </div>
-    <pre class="mb-0" style="color:var(--color-slate-200);font-family:var(--font-mono);font-size:0.875rem;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin:0;">{{ template.content }}</pre>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+      <!-- Template Info Card -->
+      <div class="card shadow-sm border-0 p-4 mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Template Info</h6>
+        <div class="d-flex flex-column gap-3">
+          <div>
+            <span class="text-muted small text-uppercase fw-semibold">Category</span>
+            <div><span class="badge bg-indigo bg-opacity-10 text-indigo mt-1">{{ template.get_category_display }}</span></div>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-semibold">Tags</span>
+            <div class="d-flex flex-wrap gap-1 mt-1">
+              {% if template.tag_list %}
+                {% for tag in template.tag_list %}
+                  <span class="badge bg-light text-dark border small fw-normal">{{ tag }}</span>
+                {% endfor %}
+              {% else %}
+                <span class="text-muted small">No tags</span>
+              {% endif %}
+            </div>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-semibold">Content</span>
+            <div class="mt-1"><span class="fw-bold">{{ template.content|length }}</span> <span class="text-muted small">characters</span></div>
+          </div>
+          <div>
+            <span class="text-muted small text-uppercase fw-semibold">Updated</span>
+            <div class="mt-1"><span class="fw-bold">{{ template.updated_at|date:"M j, Y" }}</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Card -->
+      <div class="card shadow-sm border-0 p-4 mb-4">
+        <h6 class="fw-bold mb-3"><i class="bi bi-tools me-2"></i>Actions</h6>
+        <div class="d-flex flex-column gap-2">
+          <button type="button" class="btn btn-primary btn-copy fw-semibold w-100" data-clipboard-text="{{ template.content }}">
+            <i class="bi bi-clipboard me-1"></i>Copy to Clipboard
+          </button>
+          <button type="button" class="btn btn-outline-dark fw-semibold w-100" id="downloadBtn2">
+            <i class="bi bi-download me-1"></i>Download File
+          </button>
+          <a href="/templates/" class="btn btn-outline-secondary fw-semibold w-100">
+            <i class="bi bi-arrow-left me-1"></i>Back to Library
+          </a>
+        </div>
+      </div>
+
+      <!-- Related Templates -->
+      {% if related_templates %}
+        <div class="card shadow-sm border-0 p-4">
+          <h6 class="fw-bold mb-3"><i class="bi bi-link me-2"></i>Related Templates</h6>
+          <div class="d-flex flex-column gap-2">
+            {% for related in related_templates %}
+              <a href="/templates/{{ related.slug }}/" class="text-decoration-none">
+                <div class="d-flex align-items-center gap-2 p-2 rounded hover-bg-light">
+                  <i class="bi bi-file-earmark-text text-muted"></i>
+                  <div>
+                    <div class="small fw-semibold text-dark">{{ related.title }}</div>
+                    <span class="badge bg-indigo bg-opacity-10 text-indigo" style="font-size: 0.65rem;">{{ related.get_category_display }}</span>
+                  </div>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+<script>
+  hljs.highlightAll();
+
+  function downloadTemplate() {
+    const content = {{ template.content|escapejs }};
+    const filename = "{{ template.slug }}.md";
+    const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  document.getElementById('downloadBtn')?.addEventListener('click', downloadTemplate);
+  document.getElementById('downloadBtn2')?.addEventListener('click', downloadTemplate);
+
+  document.querySelectorAll('.btn-copy').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+      const text = this.getAttribute('data-clipboard-text');
+      navigator.clipboard.writeText(text).then(() => {
+        showToast('Template copied successfully!', 'success');
+        const originalHtml = this.innerHTML;
+        this.innerHTML = '<i class="bi bi-check2"></i> Copied!';
+        setTimeout(() => { this.innerHTML = originalHtml; }, 2000);
+      }).catch(() => {
+        showToast('Failed to copy template', 'danger');
+      });
+    });
+  });
+</script>
 {% endblock %}

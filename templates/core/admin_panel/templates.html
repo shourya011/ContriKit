@@ -2,7 +2,7 @@
 {% block title %}Manage Templates — Admin Panel{% endblock %}
 
 {% block content %}
-<div class="container-app" style="padding-bottom:64px;">
+<div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
       <span class="badge bg-danger mb-1"><i class="bi bi-shield-lock-fill me-1"></i>Platform Admin</span>
@@ -34,10 +34,10 @@
               <input type="text" name="slug" class="form-control" required value="{{ edit_tmpl.slug|default:'' }}" placeholder="readme-md">
             </div>
             <div class="col-6">
-              <label class="form-label small fw-semibold">Type</label>
-              <select name="type" class="form-select" required>
-                {% for val, lbl in type_choices %}
-                  <option value="{{ val }}" {% if edit_tmpl.type == val %}selected{% endif %}>{{ lbl }}</option>
+              <label class="form-label small fw-semibold">Category</label>
+              <select name="category" class="form-select" required>
+                {% for val, lbl in categories %}
+                  <option value="{{ val }}" {% if edit_tmpl.category == val %}selected{% endif %}>{{ lbl }}</option>
                 {% endfor %}
               </select>
             </div>
@@ -46,6 +46,12 @@
           <div class="mb-3">
             <label class="form-label small fw-semibold">Short Description</label>
             <input type="text" name="description" class="form-control" value="{{ edit_tmpl.description|default:'' }}" placeholder="What is this template for?">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Tags</label>
+            <input type="text" name="tags" class="form-control" value="{{ edit_tmpl.tags|default:'' }}" placeholder="e.g. license,mit,open-source">
+            <div class="form-text small text-muted">Comma-separated tags</div>
           </div>
 
           <div class="mb-3">
@@ -71,9 +77,16 @@
           {% for t in templates %}
             <div class="list-group-item px-0 py-3 d-flex justify-content-between align-items-center">
               <div>
-                <span class="badge bg-indigo bg-opacity-10 text-indigo mb-1">{{ t.get_type_display }}</span>
+                <span class="badge bg-indigo bg-opacity-10 text-indigo mb-1">{{ t.get_category_display }}</span>
                 <h6 class="fw-bold mb-1">{{ t.title }} <small class="text-muted font-monospace">({{ t.slug }})</small></h6>
                 <p class="text-muted small mb-0">{{ t.description }}</p>
+                {% if t.tag_list %}
+                  <div class="d-flex flex-wrap gap-1 mt-1">
+                    {% for tag in t.tag_list|slice:":3" %}
+                      <span class="badge bg-light text-dark border" style="font-size: 0.65rem;">{{ tag }}</span>
+                    {% endfor %}
+                  </div>
+                {% endif %}
               </div>
               <div class="d-flex gap-2">
                 <a href="?edit={{ t.id }}" class="btn btn-sm btn-outline-dark">Edit</a>

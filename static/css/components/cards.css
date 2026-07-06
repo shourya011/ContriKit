@@ -660,3 +660,11 @@ pre.code-block {
   0% { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
+
+.bg-indigo {
+  background-color: rgba(var(--bs-indigo-rgb), var(--bs-bg-opacity, 1)) !important;
+}
+
+.text-indigo {
+  color: rgb(var(--bs-indigo-rgb)) !important;
+}
