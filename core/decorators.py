@@ -1,20 +1,27 @@
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth.mixins import UserPassesTestMixin
+from django.shortcuts import redirect
+from django.contrib import messages
+from functools import wraps
 
-def viewer_required(view_func):
-    """Viewers are default logged-in users."""
-    return user_passes_test(lambda u: u.is_authenticated)(view_func)
-
-def editor_required(view_func):
-    return user_passes_test(lambda u: u.is_authenticated and u.is_editor)(view_func)
 
 def admin_required(view_func):
-    return user_passes_test(lambda u: u.is_authenticated and u.is_platform_admin)(view_func)
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('/accounts/login/')
+        if request.user.role != 'admin' and not request.user.is_superuser:
+            messages.error(request, "Admin access required.")
+            return redirect('/')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view
 
-class EditorRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.is_editor
 
-class AdminRequiredMixin(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_authenticated and self.request.user.is_platform_admin
+def editor_required(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_authenticated:
+            return redirect('/accounts/login/')
+        if request.user.role not in ('editor', 'admin') and not request.user.is_superuser:
+            messages.error(request, "Editor access required.")
+            return redirect('/')
+        return view_func(request, *args, **kwargs)
+    return _wrapped_view

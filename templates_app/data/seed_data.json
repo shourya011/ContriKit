@@ -1,0 +1,378 @@
+[
+  {
+    "title": "MIT License",
+    "slug": "mit-license",
+    "category": "community_health",
+    "description": "The MIT License - permissive, short, and widely adopted open-source license.",
+    "tags": "license,mit,permissive,open-source",
+    "content": "MIT License\n\nCopyright (c) $(YEAR) $(OWNER)\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE."
+  },
+  {
+    "title": "Apache License 2.0",
+    "slug": "apache-license-2-0",
+    "category": "community_health",
+    "description": "The Apache License 2.0 - a permissive license with patent protection clauses.",
+    "tags": "license,apache,patent,permissive",
+    "content": "Apache License Version 2.0, January 2004\nhttp://www.apache.org/licenses/\n\nTERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION\n\n1. Definitions.\n\n\"License\" shall mean the terms and conditions for use, reproduction,\nand distribution as defined by Sections 1 through 9 of this document.\n\n\"Licensor\" shall mean the copyright owner or entity authorized by\nthe copyright owner that is granting the License.\n\n[Full Apache 2.0 license text is 11 sections standard]\n\nCopyright $(YEAR) $(OWNER)\n\nLicensed under the Apache License, Version 2.0 (the \"License\");\nyou may not use this file except in compliance with the License.\nYou may obtain a copy of the License at\n\n    http://www.apache.org/licenses/LICENSE-2.0\n\nUnless required by applicable law or agreed to in writing, software\ndistributed under the License is distributed on an \"AS IS\" BASIS,\nWITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\nSee the License for the specific language governing permissions and\nlimitations under the License."
+  },
+  {
+    "title": "GNU General Public License v3.0",
+    "slug": "gpl-license-3-0",
+    "category": "community_health",
+    "description": "GPLv3 - a strong copyleft license ensuring software freedom for all users.",
+    "tags": "license,gpl,copyleft,open-source",
+    "content": "GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007\n\nCopyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>\nEveryone is permitted to copy and distribute verbatim copies\nof this license document.\n\nThe GNU General Public License is a free, copyleft license for\nsoftware and other kinds of works.\n\nThe licenses for most software and other practical works are designed\nto take away your freedom to share and change the works. By contrast,\nthe GNU General Public License is intended to guarantee your freedom to\nshare and change all versions of a program.\n\n[Full GPLv3 text available at https://www.gnu.org/licenses/gpl-3.0.txt]\n\nThe standard GPLv3 license covers: Definitions, Source Code, Basic\nPermissions, Conveying Verbatim Copies, Conveying Modified Source\nVersions, Non-Source Conveying, Additional Terms, Termination,\nAcceptance Not Required, Automatic Licensing of Downstream Recipients,\nPatents, No Surrender of Others' Freedom, Use with the GNU Affero GPL,\nRevised Versions, Disclaimer of Warranty, Limitation of Liability."
+  },
+  {
+    "title": "CODE_OF_CONDUCT.md",
+    "slug": "code-of-conduct",
+    "category": "community_health",
+    "description": "Contributor Covenant Code of Conduct ensuring a harassment-free community.",
+    "tags": "conduct,community,safety,code-of-conduct",
+    "content": "# Contributor Covenant Code of Conduct\n\n## Our Pledge\n\nWe as members, contributors, and leaders pledge to make participation in our\ncommunity a harassment-free experience for everyone, regardless of age, body\nsize, visible or invisible disability, ethnicity, sex characteristics, gender\nidentity and expression, level of experience, education, socio-economic status,\nnationality, personal appearance, race, religion, or sexual identity\nand orientation.\n\nWe pledge to act and interact in ways that contribute to an open, welcoming,\ndiverse, inclusive, and healthy community.\n\n## Our Standards\n\nExamples of behavior that contributes to a positive environment:\n* Demonstrating empathy and kindness toward other people\n* Being respectful of differing opinions, viewpoints, and experiences\n* Giving and gracefully accepting constructive feedback\n* Accepting responsibility and apologizing to those affected by our mistakes\n\nExamples of unacceptable behavior:\n* The use of sexualized language or imagery, and sexual attention or advances\n* Trolling, insulting or derogatory comments, and personal or political attacks\n* Public or private harassment\n* Publishing others' private information without explicit permission\n\n## Enforcement Responsibilities\n\nCommunity leaders are responsible for clarifying and enforcing our standards.\n\n## Scope\n\nThis Code of Conduct applies within all community spaces.\n\n## Enforcement\n\nInstances of abusive, harassing, or otherwise unacceptable behavior may be\nreported to the community leaders responsible for enforcement.\n\n## Attribution\n\nThis Code of Conduct is adapted from the Contributor Covenant, version 2.0."
+  },
+  {
+    "title": "SECURITY.md",
+    "slug": "security-md",
+    "category": "community_health",
+    "description": "Security policy template for reporting vulnerabilities responsibly.",
+    "tags": "security,vulnerability,responsible-disclosure",
+    "content": "# Security Policy\n\n## Supported Versions\n\n| Version | Supported |\n| ------- | --------- |\n| 2.x     | Yes |\n| 1.x     | Yes |\n| < 1.0   | No |\n\n## Reporting a Vulnerability\n\nWe take security seriously. If you believe you have found a security\nvulnerability, please report it to us via email at security@example.com.\nPlease do NOT report security vulnerabilities through public GitHub issues.\n\nYou should receive a response within 48 hours. Please include:\n- Type of issue (e.g. SQL injection, XSS, etc.)\n- Full paths of source file(s) related to the issue\n- Step-by-step instructions to reproduce\n- Proof-of-concept or exploit code (if available)\n\n## Disclosure Policy\n\nWe follow a coordinated disclosure process:\n1. Security report is received and assigned a handler\n2. Problem is confirmed and affected versions identified\n3. Fixes are prepared for all supported versions\n4. Fixes are released and vulnerability announced"
+  },
+  {
+    "title": "SUPPORT.md",
+    "slug": "support-md",
+    "category": "community_health",
+    "description": "Support document guiding users to appropriate help channels and resources.",
+    "tags": "support,help,community,faq",
+    "content": "# Support\n\nThank you for using this project! Here's how to get help.\n\n## Documentation\n- README.md - Quick start and installation\n- FAQ.md - Frequently asked questions\n- CONTRIBUTING.md - How to contribute\n\n## Getting Help\n\n### 1. GitHub Discussions\nUse GitHub Discussions for questions, feature ideas, and show-and-tell.\n\n### 2. Issue Tracker\nOpen a GitHub Issue for bug reports and feature requests.\n\n### 3. Community Chat\nJoin our community chat on Discord or Slack.\n\n## How to Ask a Good Question\n1. Search first - your question may already be answered\n2. Be specific - include what you're trying to do\n3. Include details - OS, version, code snippets, error messages\n4. Show what you've tried"
+  },
+  {
+    "title": "CODEOWNERS",
+    "slug": "codeowners-file",
+    "category": "community_health",
+    "description": "GitHub CODEOWNERS file defining code review responsibilities per file pattern.",
+    "tags": "codeowners,review,ownership,maintainers",
+    "content": "# CODEOWNERS\n#\n# This file defines individuals or teams responsible for code review.\n# When a PR modifies owned code, the listed owner is auto-added as reviewer.\n#\n# Learn more: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners\n\n# Global owners\n* @trusted-maintainer\n\n# Core application code\n/src/ @core-team @senior-dev\n\n# API layer\n/api/ @api-maintainer\n\n# Documentation\n*.md @docs-team\nREADME.md @project-lead\n\n# Configuration files\n*.yml @devops-team\nDockerfile @devops-team\n\n# CI/CD\n.github/workflows/ @devops-team\n\n# Tests\n/tests/ @qa-team\n\n# Database migrations\n/migrations/ @backend-team\n\n# Frontend specific\n*.css @frontend-team\n*.jsx @frontend-team\n\n# Security sensitive\n*.pem @security-team\n*.key @security-team"
+  },
+  {
+    "title": "FUNDING.yml",
+    "slug": "funding-yml",
+    "category": "community_health",
+    "description": "GitHub Sponsors configuration for displaying funding options on your repository.",
+    "tags": "funding,sponsors,donations,community",
+    "content": "# FUNDING.yml\n#\n# Configure funding platforms on your repository.\n#\n# Learn more: https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/displaying-a-sponsor-button-in-your-repository\n\ngithub: [your-github-username]\npatreon: your-patreon-username\nko_fi: your-ko-fi-username\nopen_collective: your-opencollective-slug\nliberapay: your-liberapay-username\nissuehunt: your-issuehunt-username\ncustom:\n  - https://www.buymeacoffee.com/your-username"
+  },
+  {
+    "title": "README.md Standard Template",
+    "slug": "readme-standard",
+    "category": "documentation",
+    "description": "Comprehensive README with badges, installation, usage, contributing, and license sections.",
+    "tags": "readme,documentation,getting-started",
+    "content": "# Project Name\n\n[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/OWNER/REPO/actions)\n[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)\n[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)\n\n> A brief one-line description of what your open source project does.\n\n## Features\n- **Fast & Lightweight** - Zero bloat dependencies\n- **Easy Integration** - Works out of the box in 5 minutes\n- **Accessible** - Fully WCAG 2.1 AA compliant\n\n## Quick Start\n\n```bash\ngit clone https://github.com/username/project.git\ncd project\npip install -r requirements.txt\npython manage.py runserver\n```\n\n## Configuration\n\n| Variable | Default | Description |\n|----------|---------|-------------|\n| DEBUG | false | Debug mode |\n| PORT | 8080 | Server port |\n\n## Contributing\n\nWe love community contributions! Please read CONTRIBUTING.md for details.\n\n## License\n\nThis project is licensed under the MIT License - see the LICENSE file."
+  },
+  {
+    "title": "CHANGELOG.md",
+    "slug": "changelog-md",
+    "category": "documentation",
+    "description": "Keep a changelog following the Keep a Changelog convention with semantic versioning.",
+    "tags": "changelog,release-notes,versioning",
+    "content": "# Changelog\n\nAll notable changes to this project will be documented in this file.\n\nThe format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),\nand this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).\n\n## [Unreleased]\n\n### Added\n- New feature X that provides Y capability\n\n### Changed\n- Updated dependency from version 1.0 to 2.0\n\n### Fixed\n- Corrected memory leak in WebSocket handler (#123)\n\n### Security\n- Patched XSS vulnerability in user profile rendering (#130)\n\n## [1.1.0] - 2026-03-15\n\n### Added\n- User preference center for theme and notification settings\n- Rate limiting on public API endpoints\n\n### Changed\n- Improved query performance on dashboard by 40%\n\n### Fixed\n- Resolved CSRF token regeneration on page refresh\n- Fixed incorrect timezone handling in scheduled tasks\n\n## [1.0.0] - 2025-12-01\n\n### Added\n- Initial release with authentication, CRUD, and search\n- 100+ unit tests achieving 92% code coverage"
+  },
+  {
+    "title": "ROADMAP.md",
+    "slug": "roadmap-md",
+    "category": "documentation",
+    "description": "Project roadmap outlining short-term and long-term development goals with timelines.",
+    "tags": "roadmap,planning,vision,goals",
+    "content": "# Project Roadmap\n\n## Recently Completed (Q1 2026)\n- [x] Core authentication system with OAuth2/OIDC support\n- [x] RESTful API v1 with CRUD operations\n- [x] Initial test suite with 85% coverage\n- [x] CI/CD pipeline with GitHub Actions\n- [x] Docker containerization\n\n## In Progress (Q2 2026)\n- [ ] GraphQL API v2\n- [ ] Real-time collaboration features via WebSocket\n- [ ] Performance optimization (target: 2x throughput)\n- [ ] Mobile-responsive dashboard\n\n## Next Up (Q3 2026)\n- [ ] Plugin/extension system\n- [ ] Admin analytics dashboard\n- [ ] Webhook system for event-driven integrations\n- [ ] Localization/i18n support (5 languages)\n\n## Future Vision (Q4 2026+)\n- [ ] AI-powered recommendations\n- [ ] Native mobile apps (iOS and Android)\n- [ ] Enterprise SSO integration (SAML, LDAP)\n- [ ] Marketplace for community plugins\n\n## How to Influence This Roadmap\n1. Vote on issues using reactions on GitHub\n2. Submit feature requests with detailed use cases\n3. Join discussions in GitHub Discussions\n4. Submit pull requests for roadmap items"
+  },
+  {
+    "title": "FAQ.md",
+    "slug": "faq-md",
+    "category": "documentation",
+    "description": "Frequently Asked Questions covering common setup, usage, and troubleshooting scenarios.",
+    "tags": "faq,questions,troubleshooting,help",
+    "content": "# Frequently Asked Questions\n\n## General\n\n### What is this project?\nThis project helps developers solve [core problem] by providing [key benefits]\nwith minimal configuration.\n\n## Installation & Setup\n\n### Why do I get command not found after installing?\nMake sure the installation directory is in your PATH:\n```bash\nexport PATH=\"$HOME/.local/bin:$PATH\"\n```\n\n### How do I install a specific version?\n```bash\npip install project-name==1.2.3\n```\n\n## Configuration\n\n### How do I set environment variables?\nCreate a `.env` file in your project root with your variables.\n\n## Troubleshooting\n\n### Why does the server crash on startup?\nCheck: environment variables are set, database is running, port is not in use.\n\n### Why are my changes not reflected?\nTry: restart the server, clear cache, ensure you have hot-reload enabled.\n\n## Contributing\n\n### How do I report a bug?\nOpen an issue using the Bug Report template with reproduction steps.\n\n### Where can I get help?\n- GitHub Discussions\n- Community Discord/Slack\n- Email: support@example.com"
+  },
+  {
+    "title": "CONTRIBUTOR_GUIDE.md",
+    "slug": "contributor-guide-md",
+    "category": "documentation",
+    "description": "Comprehensive guide for new contributors covering setup, workflow, and standards.",
+    "tags": "contributor,guide,onboarding,workflow",
+    "content": "# Contributor Guide\n\nWelcome! We're thrilled you're interested in contributing to this project.\n\n## Quick Navigation\n- Code of Conduct\n- Getting Started\n- Development Workflow\n- Coding Standards\n- Testing\n- Pull Request Process\n\n## Getting Started\n\n### Prerequisites\n- Python 3.10+ or Node.js 18+\n- Git\n- A GitHub account\n\n### Setup\n```bash\ngit clone https://github.com/YOUR-USERNAME/REPO.git\ncd REPO\ngit remote add upstream https://github.com/ORIGINAL-OWNER/REPO.git\npython -m venv venv\nsource venv/bin/activate\npip install -r requirements-dev.txt\n```\n\n### Development Workflow\n1. Find an issue labeled good-first-issue\n2. Create a feature branch\n3. Make changes and commit\n4. Push and open a PR\n\n### Commit Message Convention\nWe follow Conventional Commits:\n```\n<type>(<scope>): <description>\n```\nTypes: feat, fix, docs, style, refactor, test, chore, perf\n\n## Coding Standards\n- Follow PEP 8 (Python) or ESLint (JavaScript)\n- Use type hints for all function signatures\n- Write clean, self-documenting code\n\n## Testing\n- All new features must include tests\n- Run the full test suite before submitting\n```bash\npytest\n```\n\n## Pull Request Process\n1. Describe the change clearly\n2. Link to the issue (Fixes #123)\n3. Keep PRs small and focused\n4. Ensure CI passes before merging"
+  },
+  {
+    "title": "ARCHITECTURE.md",
+    "slug": "architecture-md",
+    "category": "documentation",
+    "description": "System architecture documentation covering project structure, data flow, and design decisions.",
+    "tags": "architecture,design,system,structure",
+    "content": "# Architecture Overview\n\n## System Overview\n\nThe project follows a layered architecture:\n\n```\n+------------------+\n|   Presentation   |  API endpoints, CLI, Web UI\n+------------------+\n+------------------+\n|   Application    |  Use cases, business logic\n+------------------+\n+------------------+\n|     Domain       |  Core entities, value objects\n+------------------+\n+------------------+\n|  Infrastructure  |  Database, external APIs, file system\n+------------------+\n```\n\n## Project Structure\n```\nproject/\n  src/\n    presentation/   HTTP handlers, CLI commands\n    application/    Use cases, services\n    domain/         Core entities, business rules\n    infrastructure/ Database models, external APIs\n  tests/\n    unit/           Unit tests\n    integration/    Integration tests\n  docs/             Documentation\n```\n\n## Technology Stack\n| Component | Technology |\n|-----------|------------|\n| Language | Python 3.12 |\n| Web Framework | FastAPI/Django |\n| Database | PostgreSQL 16 |\n| Cache | Redis 7 |\n| Search | Elasticsearch 8 |\n\n## Data Flow\n1. Client sends request\n2. Middleware processes (auth, rate limiting, logging)\n3. Controller routes to appropriate service\n4. Service executes business logic\n5. Repository interacts with database\n6. Response returned to client\n\n## Security\n- JWT tokens with short expiry\n- Password hashing with bcrypt\n- Rate limiting: 100 req/min per user\n- CORS restricted to allowed origins\n- SQL injection prevention via parameterized queries"
+  },
+  {
+    "title": "RELEASE_NOTES.md",
+    "slug": "release-notes-md",
+    "category": "documentation",
+    "description": "Structured release notes template for announcing new versions with highlights and changelog.",
+    "tags": "release,notes,version,announcement",
+    "content": "# Release Notes\n\n## Version 1.1.0\n\n**Release Date**: 2026-04-15\n\n### Highlights\n\nThis release introduces the user preference center, improves API performance\nby 40%, and includes several bug fixes.\n\n### New Features\n- **User Preference Center**: Users can customize theme and notifications\n- **Rate Limiting**: Public API endpoints now enforce rate limits\n- **Health Check Endpoint**: New /health endpoint for system status\n\n### Improvements\n- Optimized dashboard query performance (40% faster)\n- Updated UI components to match latest design system\n- Improved error messages for API validation\n\n### Bug Fixes\n- Fixed CSRF token regeneration on page refresh\n- Resolved timezone handling in scheduled tasks\n- Fixed pagination offset when filtering by date\n\n### Deprecations\n- v1/users endpoint deprecated, use v2/users\n- Python 3.8 support ending in v1.2.0\n\n### Security\n- Patched stored XSS vulnerability in profile bio\n- Updated dependencies for CVE-2026-1234\n- Added Content-Security-Policy header"
+  },
+  {
+    "title": "CONTRIBUTING.md",
+    "slug": "contributing-md",
+    "category": "contributing",
+    "description": "Contribution guidelines covering Git workflow, branch strategy, and PR expectations.",
+    "tags": "contributing,git,workflow,pr",
+    "content": "# Contributing to This Project\n\nFirst off, thank you for considering contributing! We welcome contributions\nof all kinds: bug fixes, features, documentation, tests, and design.\n\n## Code of Conduct\n\nThis project adheres to a Code of Conduct. By participating, you agree to\nuphold its standards of respectful and professional behavior.\n\n## Getting Started\n\n1. Fork the repository on GitHub\n2. Clone your fork: `git clone https://github.com/YOUR_USERNAME/REPO.git`\n3. Add upstream: `git remote add upstream https://github.com/ORIGINAL_OWNER/REPO.git`\n\n## Branch Strategy\n\n- `main` - Production-ready code\n- `develop` - Integration branch\n- `feature/*` - New features\n- `fix/*` - Bug fixes\n- `hotfix/*` - Urgent production fixes\n\n### Workflow\n1. Create branch from develop: `git checkout -b feature/my-feature develop`\n2. Commit following Conventional Commits\n3. Push and open PR against develop\n4. After review, squash-merge into develop\n\n## Commit Guidelines\n\nFollow Conventional Commits:\n```\n<type>(<scope>): <description>\n\nfeat(auth): add OAuth2 login with Google provider\nfix(api): handle null response in user query\n```\n\n## Pull Request Process\n1. Title uses conventional commit format\n2. Description explains what and why\n3. Include Fixes #123 or Closes #456\n4. Keep PRs under 400 lines\n5. Ensure all CI checks pass"
+  },
+  {
+    "title": "Development Setup Guide",
+    "slug": "development-setup-guide",
+    "category": "contributing",
+    "description": "Step-by-step local development environment setup for new contributors.",
+    "tags": "setup,development,environment,local",
+    "content": "# Development Setup Guide\n\n## Prerequisites\n- Python 3.10+ (`python --version`)\n- Node.js 18+ (`node --version`)\n- Git (`git --version`)\n- PostgreSQL 14+ or SQLite\n\n## Step 1: Clone the Repository\n```bash\ngit clone https://github.com/YOUR_USERNAME/REPO.git\ncd REPO\ngit remote add upstream https://github.com/ORIGINAL_OWNER/REPO.git\n```\n\n## Step 2: Set Up Python Virtual Environment\n```bash\npython3 -m venv venv\nsource venv/bin/activate  # On Windows: venv\\Scripts\\activate\n```\n\n## Step 3: Install Dependencies\n```bash\npip install --upgrade pip\npip install -r requirements.txt\npip install -r requirements-dev.txt\npre-commit install\n```\n\n## Step 4: Configure Environment\n```bash\ncp .env.example .env\n# Edit .env with your local settings\n```\n\n## Step 5: Set Up the Database\n```bash\npython manage.py migrate\npython manage.py seed_data\n```\n\n## Step 6: Verify Your Setup\n```bash\npytest\npython manage.py runserver\n```\nVisit http://127.0.0.1:8000/ in your browser.\n\n## Common Issues\n\n### Port 8000 already in use\n```bash\npython manage.py runserver 8080\n```\n\n### Database connection refused\nEnsure PostgreSQL is running: `sudo systemctl start postgresql`"
+  },
+  {
+    "title": "Coding Standards",
+    "slug": "coding-standards",
+    "category": "contributing",
+    "description": "Language-specific coding conventions enforced through automated linters and reviews.",
+    "tags": "coding,standards,lint,style,conventions",
+    "content": "# Coding Standards\n\nConsistent code style makes the codebase easier to read, review, and maintain.\n\n## Python Standards\n\n### Formatting\n- Tool: Black with default settings\n- Line length: 88 characters\n- Quotes: Double quotes for strings\n\n### Import Ordering\n- Tool: isort\n- Order: standard library, third-party, local\n\n### Type Hints\n- All function signatures must include type hints\n- Use Optional[Type] for broader compatibility\n\n### Docstrings\n- Use Google-style docstrings\n- Required for all public modules, classes, and functions\n- Include Args, Returns, Raises sections\n\n### Naming Conventions\n| Element | Convention |\n|---------|------------|\n| Variables | snake_case |\n| Functions | snake_case |\n| Classes | PascalCase |\n| Constants | UPPER_CASE |\n\n### Code Quality Tools\n```bash\nblack --check src/\nisort --check-only src/\nflake8 src/\nmypy src/\npytest\n```\n\n## JavaScript / TypeScript Standards\n### Formatting\n- Tool: Prettier\n- Semicolons: Required\n- Quotes: Single quotes\n- Print width: 100\n\n### Naming Conventions\n| Element | Convention |\n|---------|------------|\n| Variables | camelCase |\n| Functions | camelCase |\n| Classes | PascalCase |\n| Files | kebab-case |\n\n## HTML / CSS Standards\n- Use semantic HTML5 elements\n- CSS class naming: BEM methodology\n- Responsive design: mobile-first approach\n\n## Enforcement\nThese standards are enforced through:\n1. Pre-commit hooks\n2. CI pipeline\n3. Code review"
+  },
+  {
+    "title": "Branch Strategy",
+    "slug": "branch-strategy",
+    "category": "contributing",
+    "description": "Git branching model and naming conventions for consistent collaboration.",
+    "tags": "branch,git,workflow,strategy",
+    "content": "# Branch Strategy\n\nWe use a simplified Git Flow model adapted for continuous delivery.\n\n## Branch Types\n\n### main (Production)\n- Always reflects the latest production-ready state\n- Protected: direct pushes are prohibited\n- Tags applied here for versioned releases\n\n### develop (Integration)\n- Default branch for development work\n- Feature branches are merged here\n- Must always pass CI checks\n\n### feature/* (New Features)\n- Naming: feature/<issue-number>-<description>\n- Branched from: develop\n- Merged into: develop\n\n### fix/* (Bug Fixes)\n- Naming: fix/<issue-number>-<description>\n- Branched from: develop\n- Merged into: develop\n\n### hotfix/* (Urgent Production Fixes)\n- Naming: hotfix/<issue-number>-<description>\n- Branched from: main\n- Merged into: main AND develop\n\n### release/* (Release Preparation)\n- Naming: release/<version>\n- Branched from: develop\n- Merged into: main AND develop\n\n## Workflow Example\n```bash\ngit checkout develop\ngit checkout -b fix/87-login-button-disabled\n# ... make changes ...\ngit commit -m \"fix(login): enable disabled button\"\ngit push origin fix/87-login-button-disabled\n# Create PR against develop\n```\n\n## Rules\n1. Never commit directly to main or develop\n2. Always create a PR for your changes\n3. Keep PRs small (under 400 lines)\n4. Squash commits when merging into develop\n5. Delete branches after merging"
+  },
+  {
+    "title": "Bug Report Template",
+    "slug": "bug-report-template",
+    "category": "issue_templates",
+    "description": "Structured bug report form for consistent and actionable issue submissions.",
+    "tags": "bug,report,issue,template,testing",
+    "content": "---\nname: Bug Report\nabout: Create a report to help us improve\ntitle: \"[BUG]: \"\nlabels: bug\nassignees: ''\n---\n\n## Bug Description\n\nA clear and concise description of what the bug is.\n\n## Steps to Reproduce\n\n1. Go to '...'\n2. Click on '....'\n3. Scroll down to '....'\n4. See error\n\n## Expected Behavior\n\nA clear description of what you expected to happen.\n\n## Actual Behavior\n\nA clear description of what actually happened, including any error messages.\n\n## Environment\n- OS: [e.g., macOS 14.5, Ubuntu 22.04, Windows 11]\n- Browser: [e.g., Chrome 124, Firefox 125]\n- Version: [e.g., v1.1.0]\n\n## Screenshots\n\nIf applicable, add screenshots to help explain your problem.\n\n## Additional Context\n- Is this consistent or intermittent?\n- Does it affect all users or a subset?\n- Any recent changes that might be related?\n\n## Checklist\n- [ ] I have searched for existing issues before filing this report\n- [ ] I have included all relevant environment information"
+  },
+  {
+    "title": "Feature Request Template",
+    "slug": "feature-request-template",
+    "category": "issue_templates",
+    "description": "Feature request form for proposing new functionality with detailed use cases.",
+    "tags": "feature,request,enhancement,suggestion",
+    "content": "---\nname: Feature Request\nabout: Suggest an idea for this project\ntitle: \"[FEATURE]: \"\nlabels: enhancement\nassignees: ''\n---\n\n## Problem Statement\n\nIs your feature request related to a problem? Please describe.\n\n## Proposed Solution\n\nA clear and concise description of what you want to happen.\n\n## Alternative Approaches\n\nDescribe alternatives you've considered. Why is your solution better?\n\n## Success Criteria\n\n- [ ] Users can do X in under 3 clicks\n- [ ] Feature is discoverable without documentation\n- [ ] Performance impact is under 50ms\n\n## Target Users\n\nWho will benefit from this feature?\n\n## Use Cases\n\nAs a [role], I want [goal], so that [reason].\n\n## Mockups / Designs (optional)\n\nIf you have wireframes or mockups, please attach them.\n\n## Additional Context\n\nAdd any other context, links, or references.\n\n---\n\nThank you for taking the time to suggest this improvement!"
+  },
+  {
+    "title": "Documentation Issue Template",
+    "slug": "documentation-issue-template",
+    "category": "issue_templates",
+    "description": "Report documentation gaps, errors, or improvement suggestions.",
+    "tags": "docs,documentation,issue",
+    "content": "---\nname: Documentation Issue\nabout: Report a documentation error, gap, or improvement suggestion\ntitle: \"[DOCS]: \"\nlabels: documentation\nassignees: ''\n---\n\n## Issue Type\n\n- [ ] Typo/Grammar: Spelling or grammatical error\n- [ ] Inaccuracy: Information is outdated or incorrect\n- [ ] Missing: Content that should exist but is absent\n- [ ] Clarity: Content is confusing or unclear\n- [ ] Broken Link: Link that doesn't work\n\n## Location\n\nPage: [URL or file path]\nSection: [Specific heading]\n\n## Current State\n\nWhat does the documentation currently say?\n\n## Expected State\n\nWhat should it say instead?\n\n## Impact\n\nWho is affected by this issue?\n- New users may struggle without correct documentation\n- Contributors need accurate docs to contribute effectively\n\n## Checklist\n- [ ] I have searched for existing documentation issues\n- [ ] I have provided the exact location of the issue"
+  },
+  {
+    "title": "Performance Issue Template",
+    "slug": "performance-issue-template",
+    "category": "issue_templates",
+    "description": "Report performance bottlenecks, slowdowns, or scalability concerns.",
+    "tags": "performance,slowdown,optimization,bottleneck",
+    "content": "---\nname: Performance Issue\nabout: Report a performance problem or scalability concern\ntitle: \"[PERF]: \"\nlabels: performance\nassignees: ''\n---\n\n## Performance Description\n\nDescribe the performance issue and how it affects the user experience.\n\n## Measured Metrics\n\n| Metric | Expected | Actual |\n|--------|----------|--------|\n| Page load time | < 2s | 8s |\n| API response time | < 100ms | 850ms |\n| Memory usage | < 256MB | 890MB |\n\n## Steps to Reproduce\n\n1. Navigate to '...'\n2. Observe it taking X seconds\n\n## Environment\n- Environment: [Production / Staging / Local]\n- Data volume: [e.g., 50K users]\n\n## Investigation Done\n- [ ] Checked browser DevTools\n- [ ] Reviewed server logs\n- [ ] Analyzed database query plans\n\n## Suggested Fix (optional)\n- Add database index on [column]\n- Implement caching for [endpoint]\n- Add pagination to [list view]"
+  },
+  {
+    "title": "Security Report Template",
+    "slug": "security-report-template",
+    "category": "issue_templates",
+    "description": "Private vulnerability disclosure form for responsible security reporting.",
+    "tags": "security,vulnerability,report,disclosure",
+    "content": "---\nname: Security Report\nabout: Privately report a security vulnerability\ntitle: \"[SECURITY]: \"\nlabels: security\nassignees: ''\n---\n\n## Important Notice\n\nPLEASE DO NOT DISCLOSE SECURITY ISSUES PUBLICLY. Send reports via email to\nsecurity@example.com or use GitHub private vulnerability reporting.\n\n## Vulnerability Summary\n\nA clear description without leaking exploitable details.\n\n## Affected Components\n- Project: [Component or module]\n- Version(s): [Affected versions]\n\n## Proof of Concept\n\nProvide minimal reproduction steps.\n\n## Impact Assessment\n- Severity: [Critical / High / Medium / Low]\n- Attack Vector: [Network / Local]\n- Privileges Required: [None / Low / High]\n\n## Remediation Suggestions\n\nIf you have ideas for fixing the vulnerability, describe them.\n\n## Checklist\n- [ ] I have not publicly disclosed this vulnerability\n- [ ] I will send this report through the designated secure channel"
+  },
+  {
+    "title": "Question Template",
+    "slug": "question-template",
+    "category": "issue_templates",
+    "description": "Template for asking usage questions, seeking clarification, or requesting guidance.",
+    "tags": "question,help,support,guidance",
+    "content": "---\nname: Question\nabout: Ask a question about using this project\ntitle: \"[QUESTION]: \"\nlabels: question\nassignees: ''\n---\n\n## Question\n\nWhat would you like to know?\n\n## Context\n\nWhat are you trying to achieve?\n\n## What I've Tried\n\n- [ ] Checked the README and documentation\n- [ ] Searched existing issues\n- [ ] Searched Stack Overflow\n\n## Code Snippet (if applicable)\n\n```python\n# Paste relevant code here\n```\n\n## Environment\n- Version: [e.g., v1.1.0]\n- OS: [e.g., Ubuntu 22.04]\n\n## Checklist\n- [ ] I have searched for existing questions before posting\n- [ ] I have provided enough context to understand my question"
+  },
+  {
+    "title": "Enhancement Template",
+    "slug": "enhancement-template",
+    "category": "issue_templates",
+    "description": "Propose improvements to existing features, UI, or developer experience.",
+    "tags": "enhancement,improvement,ux,dx",
+    "content": "---\nname: Enhancement\nabout: Suggest an improvement to an existing feature\ntitle: \"[ENHANCE]: \"\nlabels: enhancement\nassignees: ''\n---\n\n## Current State\n\nDescribe what currently exists and what is suboptimal about it.\n\n## Desired Improvement\n\nDescribe how you envision the improvement.\n\n## Success Criteria\n\n- [ ] Response time improves by 2x\n- [ ] Users require one fewer click\n- [ ] New contributors can onboard in 5 minutes\n\n## User Stories\n\nAs a [type of user], I want [action], so that [benefit].\n\n## Implementation Ideas (optional)\n\nIf you have technical suggestions on how to implement this.\n\n## Impact Assessment\n- Effort: [Small / Medium / Large]\n- Risk: [Low / Medium / High]\n- User Impact: [Low / Medium / High]\n\n## Additional Context\n\nAdd any other context, screenshots, or examples."
+  },
+  {
+    "title": "Refactoring Request Template",
+    "slug": "refactoring-request-template",
+    "category": "issue_templates",
+    "description": "Propose codebase restructuring, technical debt reduction, or pattern improvements.",
+    "tags": "refactoring,tech-debt,cleanup,code-quality",
+    "content": "---\nname: Refactoring Request\nabout: Propose refactoring to reduce technical debt or improve code quality\ntitle: \"[REFACTOR]: \"\nlabels: refactoring\nassignees: ''\n---\n\n## Current Code State\n\nDescribe the code that needs refactoring. Include file paths and modules.\n\n## Pain Points\n\n- [ ] Duplication: Same logic in multiple places\n- [ ] Complexity: Cyclomatic complexity above threshold\n- [ ] Testability: Difficult to write unit tests\n- [ ] Performance: Specific performance issue\n- [ ] Maintainability: Hard to understand or modify\n\n## Proposed Refactoring\n\n- [ ] Extract class/function into separate module\n- [ ] Replace pattern with alternative\n- [ ] Introduce design pattern\n- [ ] Add type hints to module\n\n## Benefits\n- Readability: How will it be easier to understand?\n- Testability: How will testing improve?\n- Maintainability: How will future changes be easier?\n\n## Success Criteria\n- [ ] Code complexity metrics improved\n- [ ] Test coverage maintained or improved\n- [ ] All existing tests pass"
+  },
+  {
+    "title": "Standard Pull Request Template",
+    "slug": "standard-pull-request-template",
+    "category": "pr_templates",
+    "description": "Standard PR checklist ensuring tests, docs, and code quality are verified before merging.",
+    "tags": "pr,pull-request,standard,review",
+    "content": "## Related Issue\n\nFixes #(issue number)\n\n## Summary of Changes\n\nBrief summary of what this PR accomplishes.\n- Added X to handle Y\n- Updated Z for performance\n\n## Type of Change\n- [ ] Bug fix (non-breaking)\n- [ ] New feature (non-breaking)\n- [ ] Documentation update\n- [ ] Refactoring (no functional changes)\n- [ ] Breaking change\n- [ ] Performance improvement\n\n## Checklist\n\n### Code Quality\n- [ ] Code follows coding standards\n- [ ] Self-review completed\n- [ ] Comments added in complex areas\n- [ ] Type hints added\n\n### Testing\n- [ ] Tests added proving fix/feature works\n- [ ] All existing tests pass\n\n### Documentation\n- [ ] README or docs updated\n- [ ] CHANGELOG updated\n\n## Screenshots (if UI change)\n\n## Testing Instructions\n1. Pull branch\n2. Run migrations\n3. Verify expected behavior\n\n## Additional Context\n- Blocked by PR #[number]\n- Related to PR #[number]"
+  },
+  {
+    "title": "Feature Pull Request Template",
+    "slug": "feature-pull-request-template",
+    "category": "pr_templates",
+    "description": "PR template for new feature contributions with implementation and testing details.",
+    "tags": "pr,pull-request,feature,new",
+    "content": "## New Feature: [Feature Name]\n\n## Feature Summary\n\nDescribe the feature being added.\n\n## Related Issues\n- Closes #(feature request issue)\n- Depends on #(blocker issue)\n\n## Implementation Details\n\n### Architecture Changes\n- New module: src/services/feature_service.py\n- New endpoint: POST /api/v2/resource\n- Modified: src/models/model.py (added 2 fields)\n\n### Database Changes\n- [ ] New migration: 0008_add_feature_fields.py\n- [ ] New table: feature_table\n\n### Configuration Changes\n- [ ] New environment variable: FEATURE_FLAG\n\n## Testing\n\n### Unit Tests\n- [ ] Tests added for service layer\n- [ ] Tests added for API endpoints\n\n### Manual Testing\n- [ ] Verified feature works in development environment\n\n## Documentation\n- [ ] README updated\n- [ ] CHANGELOG updated\n\n## Feedback Requested\nSpecific areas where I'd like reviewer input:"
+  },
+  {
+    "title": "Bug Fix Pull Request Template",
+    "slug": "bug-fix-pull-request-template",
+    "category": "pr_templates",
+    "description": "PR template for bug fix contributions with reproduction and verification details.",
+    "tags": "pr,pull-request,bugfix,fix",
+    "content": "## Bug Fix: [Brief Description]\n\n## Bug Reference\n- Fixes #(bug report issue)\n- Regression introduced in: PR #[number]\n\n## Root Cause Analysis\n\nDescribe the root cause at the code level.\n\n## The Fix\n\nExplain what changes were made:\n1. Added null-check for user in views/profile.py\n2. Added fallback redirect to login page\n3. Added unit test for the scenario\n\n## Verification\n\n### Before Fix\n1. Set session timeout to 1 second\n2. Navigate to /profile/\n3. Observe 500 error\n\n### After Fix\n1. Same steps\n2. Observe redirect to login page\n\n## Automated Tests\n- [ ] Added regression test\n- [ ] Test fails before fix, passes after fix\n\n## Files Changed\n- src/app/views/profile.py - Added null check\n- tests/test_profile.py - Added regression test\n\n## Risk Assessment\n- Impact: Low\n- Backward Compatibility: Fully compatible"
+  },
+  {
+    "title": "Documentation Pull Request Template",
+    "slug": "documentation-pull-request-template",
+    "category": "pr_templates",
+    "description": "PR template for documentation updates, corrections, and additions.",
+    "tags": "pr,pull-request,docs,documentation",
+    "content": "## Documentation Update\n\n## Summary\n\nDescribe what documentation was changed and why.\n- Fixed typos in README installation section\n- Added API reference for new v2 endpoints\n- Updated CONTRIBUTING.md with new branch strategy\n\n## Files Changed\n- [ ] README.md\n- [ ] CONTRIBUTING.md\n- [ ] CHANGELOG.md\n\n## Quality Checklist\n- [ ] Spelling and grammar checked\n- [ ] Code examples are tested and working\n- [ ] Links are valid\n- [ ] Consistent terminology used\n\n## Related Issues\n- Closes #(documentation issue)\n\n## Reviewer Notes\n- Pay special attention to the [section] for accuracy\n- All external URLs verified as of [date]"
+  },
+  {
+    "title": "Release Pull Request Template",
+    "slug": "release-pull-request-template",
+    "category": "pr_templates",
+    "description": "PR template for preparing and coordinating a new version release.",
+    "tags": "pr,pull-request,release,version",
+    "content": "## Release: v[VERSION]\n\n## Release Summary\n- Version: v[VERSION]\n- Type: [Major / Minor / Patch]\n\n## Pre-Release Checklist\n\n### Code Preparation\n- [ ] All features for this release merged to develop\n- [ ] All bug fixes merged\n- [ ] CI checks pass on develop\n\n### Release Branch\n- [ ] Release branch created: release/v[VERSION]\n- [ ] Version bumped in all config files\n- [ ] CHANGELOG.md finalized\n\n### Testing\n- [ ] Full test suite passes\n- [ ] Smoke tests pass in staging\n- [ ] Regression tests pass\n\n### Documentation\n- [ ] README updated if needed\n- [ ] API documentation up to date\n- [ ] Release notes drafted\n\n## Release Steps\n1. Merge release into main with --no-ff\n2. Tag: git tag -a v[VERSION]\n3. Deploy to production\n4. Merge back into develop\n5. Announce release"
+  },
+  {
+    "title": "Hotfix Pull Request Template",
+    "slug": "hotfix-pull-request-template",
+    "category": "pr_templates",
+    "description": "Urgent production bug fix PR template with accelerated review checklist.",
+    "tags": "pr,pull-request,hotfix,urgent",
+    "content": "## Hotfix: [Brief Description]\n\n## Urgency\n- Severity: [Critical / High]\n- Affected Users: [Count or percentage]\n\n## Bug Reference\n- Fixes #(issue number)\n\n## Root Cause\n\nBrief description of the root cause.\n\n## The Fix\n\nDescribe the minimal fix applied.\n\n## Verification\n- [ ] Bug reproduced in production-like environment\n- [ ] Fix verified\n- [ ] Existing tests pass\n\n## Checklist\n- [ ] Code reviewed by at least one maintainer\n- [ ] Fix is minimal and targeted\n- [ ] Follow-up issue created for permanent fix\n- [ ] Hotfix deployed to production\n\n## Merge Instructions\n1. Merge into main\n2. Deploy immediately\n3. Merge main back into develop"
+  },
+  {
+    "title": "Dependabot Configuration",
+    "slug": "dependabot-configuration",
+    "category": "github_config",
+    "description": "GitHub Dependabot YAML configuration for automated dependency updates.",
+    "tags": "dependabot,dependencies,security,automation",
+    "content": "# Dependabot Configuration\n# Place in: .github/dependabot.yml\n\nversion: 2\nupdates:\n  - package-ecosystem: \"pip\"\n    directory: \"/\"\n    schedule:\n      interval: \"weekly\"\n      day: \"monday\"\n    open-pull-requests-limit: 10\n    labels:\n      - \"dependencies\"\n      - \"python\"\n\n  - package-ecosystem: \"npm\"\n    directory: \"/frontend\"\n    schedule:\n      interval: \"weekly\"\n      day: \"monday\"\n    open-pull-requests-limit: 10\n    labels:\n      - \"dependencies\"\n      - \"javascript\"\n\n  - package-ecosystem: \"github-actions\"\n    directory: \"/\"\n    schedule:\n      interval: \"weekly\"\n    labels:\n      - \"dependencies\"\n      - \"ci\"\n\n  - package-ecosystem: \"docker\"\n    directory: \"/\"\n    schedule:\n      interval: \"monthly\"\n    labels:\n      - \"dependencies\"\n      - \"docker\""
+  },
+  {
+    "title": "GitHub Actions CI Workflow",
+    "slug": "github-actions-ci-workflow",
+    "category": "github_config",
+    "description": "CI workflow for automated testing, linting, and type checking on every push.",
+    "tags": "ci,github-actions,testing,lint",
+    "content": "# CI Workflow\n# Place in: .github/workflows/ci.yml\n\nname: CI\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main, develop]\n\njobs:\n  lint:\n    name: Lint & Type Check\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: \"3.12\"\n          cache: \"pip\"\n      - run: pip install -r requirements-dev.txt\n      - run: flake8 src/ --max-line-length=88\n      - run: black --check src/\n      - run: mypy src/\n\n  test:\n    name: Run Tests\n    runs-on: ubuntu-latest\n    services:\n      postgres:\n        image: postgres:16\n        env:\n          POSTGRES_PASSWORD: postgres\n          POSTGRES_DB: test_db\n        options: --health-cmd pg_isready --health-interval 10s\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: \"3.12\"\n          cache: \"pip\"\n      - run: pip install -r requirements-dev.txt\n      - run: pytest --cov=src --cov-report=xml\n      - uses: codecov/codecov-action@v4"
+  },
+  {
+    "title": "Node.js Workflow",
+    "slug": "nodejs-workflow",
+    "category": "github_config",
+    "description": "GitHub Actions workflow for Node.js projects with testing and linting.",
+    "tags": "nodejs,javascript,ci,workflow",
+    "content": "# Node.js CI Workflow\n# Place in: .github/workflows/nodejs.yml\n\nname: Node.js CI\n\non:\n  push:\n    branches: [main, develop]\n    paths:\n      - \"frontend/**\"\n      - \"package.json\"\n  pull_request:\n    branches: [main, develop]\n\njobs:\n  lint:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: \"20\"\n          cache: \"yarn\"\n      - run: yarn install --frozen-lockfile\n      - run: yarn lint\n\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: \"20\"\n          cache: \"yarn\"\n      - run: yarn install --frozen-lockfile\n      - run: yarn test --coverage\n\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-node@v4\n        with:\n          node-version: \"20\"\n          cache: \"yarn\"\n      - run: yarn install --frozen-lockfile\n      - run: yarn build"
+  },
+  {
+    "title": "Java Maven Workflow",
+    "slug": "java-maven-workflow",
+    "category": "github_config",
+    "description": "GitHub Actions workflow for Java projects using Maven build system.",
+    "tags": "java,maven,ci,workflow",
+    "content": "# Java Maven CI Workflow\n# Place in: .github/workflows/maven.yml\n\nname: Java Maven CI\n\non:\n  push:\n    branches: [main, develop]\n  pull_request:\n    branches: [main, develop]\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-java@v4\n        with:\n          java-version: \"21\"\n          distribution: \"temurin\"\n          cache: maven\n      - run: mvn --batch-mode verify\n      - uses: actions/upload-artifact@v4\n        if: always()\n        with:\n          name: test-results\n          path: target/surefire-reports/\n\n  lint:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-java@v4\n        with:\n          java-version: \"21\"\n          distribution: \"temurin\"\n          cache: maven\n      - run: mvn checkstyle:check\n      - run: mvn pmd:check"
+  },
+  {
+    "title": "Spring Boot Workflow",
+    "slug": "spring-boot-workflow",
+    "category": "github_config",
+    "description": "GitHub Actions workflow for Spring Boot applications with Docker build.",
+    "tags": "spring-boot,java,workflow,docker",
+    "content": "# Spring Boot CI/CD Workflow\n# Place in: .github/workflows/spring-boot.yml\n\nname: Spring Boot CI/CD\n\non:\n  push:\n    branches: [main, develop]\n  release:\n    types: [published]\n\njobs:\n  test:\n    runs-on: ubuntu-latest\n    services:\n      postgres:\n        image: postgres:16\n        env:\n          POSTGRES_DB: testdb\n          POSTGRES_PASSWORD: test\n        options: --health-cmd pg_isready\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-java@v4\n        with:\n          java-version: \"21\"\n          distribution: \"temurin\"\n          cache: maven\n      - run: mvn --batch-mode test\n\n  docker:\n    runs-on: ubuntu-latest\n    needs: [test]\n    if: github.ref == 'refs/heads/main'\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-java@v4\n        with:\n          java-version: \"21\"\n          distribution: \"temurin\"\n          cache: maven\n      - run: mvn --batch-mode package -DskipTests\n      - uses: docker/setup-buildx-action@v3\n      - uses: docker/login-action@v3\n        with:\n          registry: ghcr.io\n          username: ${{ github.actor }}\n          password: ${{ secrets.GITHUB_TOKEN }}\n      - uses: docker/build-push-action@v6\n        with:\n          context: .\n          push: true\n          tags: ghcr.io/${{ github.repository }}:latest"
+  },
+  {
+    "title": "Docker Build Workflow",
+    "slug": "docker-build-workflow",
+    "category": "github_config",
+    "description": "GitHub Actions workflow for building and pushing Docker images with multi-arch support.",
+    "tags": "docker,container,build,ci",
+    "content": "# Docker Build Workflow\n# Place in: .github/workflows/docker.yml\n\nname: Docker Build\n\non:\n  push:\n    branches: [main]\n    tags: [\"v*\"]\n\nenv:\n  REGISTRY: ghcr.io\n  IMAGE_NAME: ${{ github.repository }}\n\njobs:\n  build:\n    runs-on: ubuntu-latest\n    permissions:\n      contents: read\n      packages: write\n      id-token: write\n    steps:\n      - uses: actions/checkout@v4\n      - uses: docker/setup-qemu-action@v3\n      - uses: docker/setup-buildx-action@v3\n      - uses: docker/login-action@v3\n        with:\n          registry: ${{ env.REGISTRY }}\n          username: ${{ github.actor }}\n          password: ${{ secrets.GITHUB_TOKEN }}\n      - uses: docker/metadata-action@v5\n        id: meta\n        with:\n          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}\n          tags: |\n            type=semver,pattern={{version}}\n            type=raw,value=latest,enable={{is_default_branch}}\n      - uses: docker/build-push-action@v6\n        with:\n          context: .\n          platforms: linux/amd64,linux/arm64\n          push: true\n          tags: ${{ steps.meta.outputs.tags }}"
+  },
+  {
+    "title": "Release Workflow",
+    "slug": "release-workflow",
+    "category": "github_config",
+    "description": "GitHub Actions workflow for automated version releases with changelog generation.",
+    "tags": "release,workflow,automation,ci",
+    "content": "# Release Workflow\n# Place in: .github/workflows/release.yml\n\nname: Release\n\non:\n  push:\n    tags: [\"v*\"]\n\npermissions:\n  contents: write\n  packages: write\n\njobs:\n  release:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          fetch-depth: 0\n      - uses: softprops/action-gh-release@v2\n        with:\n          generate_release_notes: true\n          files: |\n            dist/*.whl\n            dist/*.tar.gz\n\n  deploy:\n    runs-on: ubuntu-latest\n    needs: [release]\n    steps:\n      - uses: actions/checkout@v4\n      - uses: actions/setup-python@v5\n        with:\n          python-version: \"3.12\"\n      - run: pip install -r requirements.txt\n      - run: python -m build\n      - env:\n          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}\n        run: |\n          pip install twine\n          twine upload dist/*"
+  },
+  {
+    "title": "Bug Report (Issue Form YAML)",
+    "slug": "bug-report-issue-form",
+    "category": "issue_forms",
+    "description": "GitHub Issue Form (YAML) for structured bug reports with form inputs and validation.",
+    "tags": "issue-form,yaml,bug,report,github-forms",
+    "content": "name: Bug Report\ndescription: File a bug report to help us improve\ntitle: \"[BUG]: \"\nlabels: [\"bug\", \"needs-triage\"]\nbody:\n  - type: markdown\n    attributes:\n      value: Thanks for filing a bug report!\n  - type: input\n    id: version\n    attributes:\n      label: Version\n      placeholder: v1.2.3\n    validations:\n      required: true\n  - type: textarea\n    id: what-happened\n    attributes:\n      label: What happened?\n      placeholder: When I click X, Y happens instead of Z\n    validations:\n      required: true\n  - type: textarea\n    id: reproduction\n    attributes:\n      label: Steps to Reproduce\n      placeholder: |\n        1. Go to ...\n        2. Click on ...\n        3. See error\n    validations:\n      required: true\n  - type: textarea\n    id: expected\n    attributes:\n      label: Expected Behavior\n    validations:\n      required: true\n  - type: dropdown\n    id: os\n    attributes:\n      label: OS\n      options:\n        - macOS\n        - Linux\n        - Windows\n  - type: checkboxes\n    id: terms\n    attributes:\n      label: Checklist\n      options:\n        - label: I have searched existing issues\n          required: true"
+  },
+  {
+    "title": "Feature Request (Issue Form YAML)",
+    "slug": "feature-request-issue-form",
+    "category": "issue_forms",
+    "description": "GitHub Issue Form (YAML) for structured feature requests with form validation.",
+    "tags": "issue-form,yaml,feature,request,github-forms",
+    "content": "name: Feature Request\ndescription: Suggest an idea for this project\ntitle: \"[FEATURE]: \"\nlabels: [\"enhancement\"]\nbody:\n  - type: markdown\n    attributes:\n      value: Thanks for suggesting a feature!\n  - type: textarea\n    id: problem\n    attributes:\n      label: Problem Statement\n      placeholder: I'm always frustrated when...\n    validations:\n      required: true\n  - type: textarea\n    id: solution\n    attributes:\n      label: Proposed Solution\n      placeholder: I'd like to see...\n    validations:\n      required: true\n  - type: textarea\n    id: alternatives\n    attributes:\n      label: Alternative Approaches\n  - type: dropdown\n    id: priority\n    attributes:\n      label: Priority\n      options:\n        - Nice to have\n        - Important\n        - Critical\n  - type: checkboxes\n    id: terms\n    attributes:\n      label: Checklist\n      options:\n        - label: I have searched existing feature requests\n          required: true"
+  },
+  {
+    "title": "Question (Issue Form YAML)",
+    "slug": "question-issue-form",
+    "category": "issue_forms",
+    "description": "GitHub Issue Form (YAML) for structured questions and help requests.",
+    "tags": "issue-form,yaml,question,help,github-forms",
+    "content": "name: Question\ndescription: Ask a question about using this project\ntitle: \"[QUESTION]: \"\nlabels: [\"question\"]\nbody:\n  - type: markdown\n    attributes:\n      value: Have a question? We're here to help!\n  - type: input\n    id: version\n    attributes:\n      label: Version\n      placeholder: v1.2.3\n  - type: textarea\n    id: question\n    attributes:\n      label: Your Question\n      placeholder: How do I configure...\n    validations:\n      required: true\n  - type: textarea\n    id: what-tried\n    attributes:\n      label: What I've Tried\n  - type: textarea\n    id: code\n    attributes:\n      label: Code Snippet\n      render: python\n  - type: checkboxes\n    id: terms\n    attributes:\n      label: Checklist\n      options:\n        - label: I have searched existing questions\n          required: true"
+  },
+  {
+    "title": "Documentation (Issue Form YAML)",
+    "slug": "documentation-issue-form",
+    "category": "issue_forms",
+    "description": "GitHub Issue Form (YAML) for documentation gap reports and improvement suggestions.",
+    "tags": "issue-form,yaml,documentation,docs,github-forms",
+    "content": "name: Documentation Issue\ndescription: Report a documentation gap or suggest improvement\ntitle: \"[DOCS]: \"\nlabels: [\"documentation\"]\nbody:\n  - type: dropdown\n    id: type\n    attributes:\n      label: Issue Type\n      options:\n        - Typo or grammatical error\n        - Incorrect or outdated information\n        - Missing documentation\n        - Broken link\n    validations:\n      required: true\n  - type: input\n    id: location\n    attributes:\n      label: Location\n      placeholder: \"README.md, Installation section\"\n    validations:\n      required: true\n  - type: textarea\n    id: current\n    attributes:\n      label: Current State\n  - type: textarea\n    id: expected\n    attributes:\n      label: Expected State\n    validations:\n      required: true\n  - type: checkboxes\n    id: terms\n    attributes:\n      label: Checklist\n      options:\n        - label: I have searched existing documentation issues\n          required: true"
+  },
+  {
+    "title": "GitHub Discussions - Ideas",
+    "slug": "github-discussions-ideas",
+    "category": "discussions",
+    "description": "GitHub Discussions category template for sharing and discussing new ideas.",
+    "tags": "discussions,ideas,feedback,community",
+    "content": "---\nlabels: [\"ideas\", \"discussion\"]\n---\n\n## Idea: [Title]\n\n### Summary\n\nBriefly describe your idea in one or two sentences.\n\n### Problem It Solves\n\nWhat problem does this idea solve?\n\n### Proposed Solution\n\nDescribe your idea in detail from a user's perspective.\n\n### Benefits\n- Benefit 1\n- Benefit 2\n- Benefit 3\n\n### Potential Challenges\n- Challenge 1\n- Challenge 2\n\n### Prior Art\n\nAre there existing projects that do something similar?\n\n### Questions for Discussion\n1. Question for the community\n2. Question for the community\n\n---\n\nThanks for sharing your idea!"
+  },
+  {
+    "title": "GitHub Discussions - Q&A",
+    "slug": "github-discussions-qa",
+    "category": "discussions",
+    "description": "GitHub Discussions category template for asking questions and getting help.",
+    "tags": "discussions,qa,help,questions",
+    "content": "---\nlabels: [\"question\", \"help-wanted\"]\n---\n\n## Question\n\n### What I'm Trying To Do\n\nDescribe your goal.\n\n### What I've Tried\n\nList the steps you've already taken.\n\n### What's Not Working\n\nDescribe the problem.\n\n### Environment\n- Version: [e.g., v1.2.0]\n- OS: [e.g., macOS 14.5]\n- Language Version: [e.g., Python 3.12]\n\n### Code / Configuration\n\n```python\n# Share relevant code\n```\n\n### What I Expected\n\n### What I've Researched\n- [ ] Read README and docs\n- [ ] Searched existing discussions\n- [ ] Searched Stack Overflow"
+  },
+  {
+    "title": "GitHub Discussions - Show and Tell",
+    "slug": "github-discussions-show-and-tell",
+    "category": "discussions",
+    "description": "GitHub Discussions template for sharing what you've built with the project.",
+    "tags": "discussions,show-and-tell,community,showcase",
+    "content": "---\nlabels: [\"show-and-tell\", \"community\"]\n---\n\n## Show and Tell: [Project Name]\n\n### What I Built\n\nDescribe your project or what you created.\n\n### Links\n- Repository: [GitHub URL]\n- Live Demo: [URL]\n\n### How I Used This Project\n\nExplain how this project was useful.\n\n### What I Learned\n\nShare any insights or tips.\n\n### Challenges I Faced\n\nWhat was difficult and how did you overcome it?\n\n### Screenshots / Demo\n\n### Tech Stack Used\n- Technology 1\n- Technology 2\n\n### Would You Recommend This Project?\n\n[Yes/No] - Why?\n\n---\n\nWe love seeing what the community builds!"
+  }
+]
