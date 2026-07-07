@@ -36,3 +36,9 @@ staticfiles/
 
 # Project specific
 *.db
+
+# Logs
+*.log
+
+# Python version (if you use pyenv)
+.python-version

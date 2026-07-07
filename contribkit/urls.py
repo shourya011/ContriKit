@@ -3,18 +3,20 @@ from django.urls import path, include
 from core import views as core_views
 
 urlpatterns = [
-    # Built-in django admin renamed to /django-admin/ per spec
+    # Built-in django admin
     path('admin/', admin.site.urls),
-    
+
+    # Axes rate limiting lockout URLs
+
     # Landing page & Dashboard
     path('', core_views.landing_page, name='landing'),
     path('dashboard/', core_views.dashboard_view, name='dashboard'),
     path('dashboard/saved/', core_views.saved_issues_list_view, name='saved_issues'),
     path('dashboard/switch-role/', core_views.switch_role_view, name='switch_role'),
-    
+
     # Auth
     path('accounts/', include('accounts.urls')),
-    
+
     # Apps
     path('issues/', include('issues.urls')),
     path('templates/', include('templates_app.urls')),
