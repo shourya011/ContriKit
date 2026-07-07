@@ -95,6 +95,8 @@
                 </li>
                 <li><hr class="dropdown-divider"></li>
               {% endif %}
+              <li><a class="dropdown-item" href="/accounts/password-change/"><i class="bi bi-key me-2"></i>Change Password</a></li>
+              <li><hr class="dropdown-divider"></li>
               <li>
                 <form action="/accounts/logout/" method="POST">
                   {% csrf_token %}

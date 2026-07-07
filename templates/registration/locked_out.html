@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Account Locked — ContribKit{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5 text-center">
+      <div class="card shadow-sm border-0 p-5">
+        <div class="mb-3 text-danger" style="font-size: 3rem;">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
+        <h3 class="fw-bold mb-2">Account Temporarily Locked</h3>
+        <p class="text-muted mb-4">
+          Too many failed login attempts. Please wait 30 minutes before trying again.
+        </p>
+        <a href="/accounts/login/" class="btn btn-primary fw-semibold">Try Again</a>
+        <a href="/" class="btn btn-outline-secondary fw-semibold ms-2">Go Home</a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
