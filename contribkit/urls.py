@@ -4,7 +4,7 @@ from core import views as core_views
 
 urlpatterns = [
     # Built-in django admin renamed to /django-admin/ per spec
-    path('django-admin/', admin.site.urls),
+    path('admin/', admin.site.urls),
     
     # Landing page & Dashboard
     path('', core_views.landing_page, name='landing'),
