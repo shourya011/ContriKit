@@ -37,7 +37,7 @@ Test the platform instantly without creating a new account:
 
 | Role | Username | Password | Capabilities |
 | :--- | :--- | :--- | :--- |
-| **Platform Admin** | `admin` | `adminpass123` | Full custom admin panel (`/admin-panel/`) + Django Admin (`/django-admin/`) |
+| **Platform Admin** | `admin` | `adminpass123` | Full custom admin panel (`/admin-panel/`) + Django Admin (`/admin/`) |
 | **Maintainer (Editor)** | `demo_editor` | `editorpass123` | Link repos, post issues, bulk import from GitHub, view analytics |
 | **Contributor (Viewer)** | `demo_viewer` | `viewerpass123` | Bookmark issues via AJAX, browse cheat sheet, self-upgrade to Editor |
 
