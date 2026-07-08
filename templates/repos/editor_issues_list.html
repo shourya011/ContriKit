@@ -2,96 +2,111 @@
 {% block title %}Manage Posted Issues — ContribKit Editor{% endblock %}
 
 {% block content %}
-<div class="container-app" style="padding-bottom:64px;">
-  <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
-    <div>
-      <h2 class="fw-bold mb-1"><i class="bi bi-card-checklist text-indigo me-2"></i>My Posted Issues</h2>
-      <p class="text-muted small mb-0">Manage open/closed status, edit details, and track session views.</p>
-    </div>
-    <div class="d-flex gap-2">
-      <a href="/editor/issues/import/" class="btn btn-outline-primary fw-semibold btn-sm">
-        <i class="bi bi-cloud-arrow-down me-1"></i>Bulk Import
-      </a>
-      <a href="/editor/issues/create/" class="btn btn-primary fw-semibold btn-sm">
-        <i class="bi bi-plus-lg me-1"></i>Post New Issue
-      </a>
-    </div>
-  </div>
+<div class="editor-page">
+  <div class="container-app">
 
-  <div class="card bg-white shadow-sm border-0 p-4">
-    {% if issues %}
-      <div class="table-responsive">
-        <table class="table table-hover align-middle">
-          <thead class="table-light small text-muted text-uppercase">
-            <tr>
-              <th>Title</th>
-              <th>Repository</th>
-              <th>Difficulty</th>
-              <th>Est. Hours</th>
-              <th>Status</th>
-              <th>Views</th>
-              <th class="text-end">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for issue in issues %}
+    <header class="dashboard-header">
+      <div>
+        <h1 class="dashboard-header__title mb-0">
+          <i class="bi bi-card-checklist text-indigo me-2"></i>My Posted Issues
+        </h1>
+        <p class="dashboard-header__desc mt-1">Manage open/closed status, edit details, and track session views.</p>
+      </div>
+      <div class="flex-shrink-0 d-flex flex-wrap gap-2">
+        <a href="/editor/issues/import/" class="btn btn-outline-primary fw-semibold btn-sm">
+          <i class="bi bi-cloud-arrow-down"></i> Bulk Import
+        </a>
+        <a href="/editor/issues/create/" class="btn btn-primary fw-semibold btn-sm">
+          <i class="bi bi-plus-lg"></i> Post New Issue
+        </a>
+      </div>
+    </header>
+
+    <div class="dashboard-panel">
+      {% if issues %}
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light small text-muted text-uppercase">
               <tr>
-                <td>
-                  <a href="/issues/{{ issue.id }}/" class="fw-bold text-dark text-decoration-none">{{ issue.title }}</a>
-                </td>
-                <td><span class="badge bg-secondary bg-opacity-10 text-dark">{{ issue.repo.name }}</span></td>
-                <td>
-                  {% if issue.difficulty == 'beginner' %}
-                    <span class="badge bg-success bg-opacity-10 text-success border border-success">Beginner</span>
-                  {% else %}
-                    <span class="badge bg-warning bg-opacity-10 text-dark border border-warning">Intermediate</span>
-                  {% endif %}
-                </td>
-                <td class="text-muted small">~{{ issue.estimated_hours }}h</td>
-                <td>
-                  {% if issue.status == 'open' %}
-                    <span class="badge bg-success">Open</span>
-                  {% else %}
-                    <span class="badge bg-secondary">Closed</span>
-                  {% endif %}
-                </td>
-                <td class="fw-semibold">{{ issue.view_count }}</td>
-                <td class="text-end">
-                  <div class="d-flex justify-content-end gap-1">
-                    <a href="/editor/issues/edit/{{ issue.id }}/" class="btn btn-sm btn-outline-dark" title="Edit">
-                      <i class="bi bi-pencil"></i>
-                    </a>
-                    <form method="POST" action="/editor/issues/" class="d-inline">
-                      {% csrf_token %}
-                      <input type="hidden" name="issue_id" value="{{ issue.id }}">
-                      <input type="hidden" name="action" value="toggle_status">
-                      <button type="submit" class="btn btn-sm {% if issue.status == 'open' %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="Toggle Open/Closed">
-                        <i class="bi {% if issue.status == 'open' %}bi-archive{% else %}bi-arrow-counterclockwise{% endif %}"></i>
-                      </button>
-                    </form>
-                    <form method="POST" action="/editor/issues/" class="d-inline" onsubmit="return confirm('Delete this issue permanently?');">
-                      {% csrf_token %}
-                      <input type="hidden" name="issue_id" value="{{ issue.id }}">
-                      <input type="hidden" name="action" value="delete">
-                      <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </form>
-                  </div>
-                </td>
+                <th>Title</th>
+                <th>Repository</th>
+                <th>Difficulty</th>
+                <th>Est. Hours</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th class="text-end">Actions</th>
               </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    {% else %}
-      <div class="empty-state my-4">
-        <div class="empty-state-icon"><i class="bi bi-card-text"></i></div>
-        <h4>No contribution issues posted</h4>
-        <p class="text-muted">Create an issue manually or use the bulk GitHub import tool to pull beginner candidates.</p>
-        <a href="/editor/issues/create/" class="btn btn-primary mt-2">Post New Issue</a>
-      </div>
-    {% endif %}
+            </thead>
+            <tbody>
+              {% for issue in issues %}
+                <tr>
+                  <td>
+                    <a href="/issues/{{ issue.id }}/" class="fw-bold text-dark text-decoration-none">{{ issue.title }}</a>
+                  </td>
+                  <td><span class="badge bg-secondary bg-opacity-10 text-dark">{{ issue.repo.name }}</span></td>
+                  <td>
+                    {% if issue.difficulty == 'beginner' %}
+                      <span class="badge bg-success bg-opacity-10 text-success border border-success">Beginner</span>
+                    {% else %}
+                      <span class="badge bg-warning bg-opacity-10 text-dark border border-warning">Intermediate</span>
+                    {% endif %}
+                  </td>
+                  <td class="text-muted small">~{{ issue.estimated_hours }}h</td>
+                  <td>
+                    {% if issue.status == 'open' %}
+                      <span class="badge bg-success">Open</span>
+                    {% else %}
+                      <span class="badge bg-secondary">Closed</span>
+                    {% endif %}
+                  </td>
+                  <td class="fw-semibold">{{ issue.view_count }}</td>
+                  <td class="text-end">
+                    <div class="d-flex justify-content-end gap-1">
+                      <a href="/editor/issues/edit/{{ issue.id }}/" class="btn btn-sm btn-outline-dark" title="Edit">
+                        <i class="bi bi-pencil"></i>
+                      </a>
+                      <form method="POST" action="/editor/issues/" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="issue_id" value="{{ issue.id }}">
+                        <input type="hidden" name="action" value="toggle_status">
+                        <button type="submit" class="btn btn-sm {% if issue.status == 'open' %}btn-outline-warning{% else %}btn-outline-success{% endif %}" title="Toggle Open/Closed">
+                          <i class="bi {% if issue.status == 'open' %}bi-archive{% else %}bi-arrow-counterclockwise{% endif %}"></i>
+                        </button>
+                      </form>
+                      <form method="POST" action="/editor/issues/" class="d-inline" onsubmit="return confirm('Delete this issue permanently?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="issue_id" value="{{ issue.id }}">
+                        <input type="hidden" name="action" value="delete">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      {% else %}
+        <div class="dashboard-empty">
+          <div class="dashboard-empty__icon"><i class="bi bi-card-text"></i></div>
+          <h4 class="text-card-title mb-2">No contribution issues posted</h4>
+          <p class="text-meta text-muted mb-3" style="max-width:420px;">
+            Create an issue manually or use the bulk GitHub import tool to pull beginner-friendly candidates from your linked repositories.
+          </p>
+          <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <a href="/editor/issues/create/" class="btn btn-primary btn-sm">
+              <i class="bi bi-plus-lg"></i> Post New Issue
+            </a>
+            <a href="/editor/issues/import/" class="btn btn-outline-primary btn-sm">
+              <i class="bi bi-cloud-arrow-down"></i> Bulk Import
+            </a>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
   </div>
 </div>
 {% endblock %}

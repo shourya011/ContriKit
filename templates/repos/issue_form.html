@@ -2,77 +2,88 @@
 {% block title %}{{ title }} — ContribKit{% endblock %}
 
 {% block content %}
-<div class="container-app" style="padding-bottom:64px;">
-  <div class="row justify-content-center">
-    <div class="col-lg-8">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold mb-0"><i class="bi bi-pencil-square text-indigo me-2"></i>{{ title }}</h2>
-        <a href="/editor/issues/" class="btn btn-outline-secondary btn-sm">Cancel</a>
-      </div>
+<div class="editor-page">
+  <div class="container-app">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
 
-      <div class="card p-4 p-md-5 bg-white shadow-sm border-0">
-        <form method="POST">
-          {% csrf_token %}
-          {% if form.non_field_errors %}
-            <div class="alert alert-danger small py-2">{{ form.non_field_errors }}</div>
-          {% endif %}
-
-          <div class="mb-4">
-            <label class="form-label fw-semibold small">Select Linked Repository <span class="text-danger">*</span></label>
-            {{ form.repo }}
-            {% if form.repo.errors %}<div class="text-danger small mt-1">{{ form.repo.errors.0 }}</div>{% endif %}
-            <div class="form-text small">Don't see your repo? <a href="/editor/repos/" target="_blank">Link it first ↗</a></div>
+        <header class="dashboard-header">
+          <div>
+            <h1 class="dashboard-header__title mb-0">
+              <i class="bi bi-pencil-square text-indigo me-2"></i>{{ title }}
+            </h1>
+            <p class="dashboard-header__desc mt-1">Fill in the details below to publish a beginner-friendly contribution opportunity.</p>
           </div>
-
-          <div class="mb-4">
-            <label class="form-label fw-semibold small">Opportunity Title <span class="text-danger">*</span></label>
-            {{ form.title }}
-            {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
+          <div class="flex-shrink-0">
+            <a href="/editor/issues/" class="btn btn-outline-secondary btn-sm">Cancel</a>
           </div>
+        </header>
 
-          <div class="mb-4">
-            <label class="form-label fw-semibold small">Direct GitHub Issue URL <span class="text-danger">*</span></label>
-            {{ form.github_issue_url }}
-            {% if form.github_issue_url.errors %}<div class="text-danger small mt-1">{{ form.github_issue_url.errors.0 }}</div>{% endif %}
-            <div class="form-text small">Contributors will click this link to comment and open their PR on GitHub.</div>
-          </div>
+        <div class="dashboard-panel">
+          <form method="POST">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger small py-2">{{ form.non_field_errors }}</div>
+            {% endif %}
 
-          <div class="row g-3 mb-4">
-            <div class="col-md-4">
-              <label class="form-label fw-semibold small">Difficulty</label>
-              {{ form.difficulty }}
-              {% if form.difficulty.errors %}<div class="text-danger small mt-1">{{ form.difficulty.errors.0 }}</div>{% endif %}
+            <div class="mb-4">
+              <label class="form-label fw-semibold small">Select Linked Repository <span class="text-danger">*</span></label>
+              {{ form.repo }}
+              {% if form.repo.errors %}<div class="text-danger small mt-1">{{ form.repo.errors.0 }}</div>{% endif %}
+              <div class="form-text small">Don't see your repo? <a href="/editor/repos/" target="_blank">Link it first ↗</a></div>
             </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold small">Estimated Hours</label>
-              {{ form.estimated_hours }}
-              {% if form.estimated_hours.errors %}<div class="text-danger small mt-1">{{ form.estimated_hours.errors.0 }}</div>{% endif %}
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold small">Opportunity Title <span class="text-danger">*</span></label>
+              {{ form.title }}
+              {% if form.title.errors %}<div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>{% endif %}
             </div>
-            <div class="col-md-4">
-              <label class="form-label fw-semibold small">Status</label>
-              {{ form.status }}
-              {% if form.status.errors %}<div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>{% endif %}
+
+            <div class="mb-4">
+              <label class="form-label fw-semibold small">Direct GitHub Issue URL <span class="text-danger">*</span></label>
+              {{ form.github_issue_url }}
+              {% if form.github_issue_url.errors %}<div class="text-danger small mt-1">{{ form.github_issue_url.errors.0 }}</div>{% endif %}
+              <div class="form-text small">Contributors will click this link to comment and open their PR on GitHub.</div>
             </div>
-          </div>
 
-          <div class="mb-4">
-            <label class="form-label fw-semibold small">Tech Stack & Tags</label>
-            {{ form.tags }}
-            {% if form.tags.errors %}<div class="text-danger small mt-1">{{ form.tags.errors.0 }}</div>{% endif %}
-            <div class="form-text small">{{ form.tags.help_text }}</div>
-          </div>
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Difficulty</label>
+                {{ form.difficulty }}
+                {% if form.difficulty.errors %}<div class="text-danger small mt-1">{{ form.difficulty.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Estimated Hours</label>
+                {{ form.estimated_hours }}
+                {% if form.estimated_hours.errors %}<div class="text-danger small mt-1">{{ form.estimated_hours.errors.0 }}</div>{% endif %}
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-semibold small">Status</label>
+                {{ form.status }}
+                {% if form.status.errors %}<div class="text-danger small mt-1">{{ form.status.errors.0 }}</div>{% endif %}
+              </div>
+            </div>
 
-          <div class="mb-5">
-            <label class="form-label fw-semibold small">Context & Step-by-Step Guidance <span class="text-danger">*</span></label>
-            {{ form.description }}
-            {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>{% endif %}
-            <div class="form-text small">Explain what files to look at, how to test locally, and any specific requirements.</div>
-          </div>
+            <div class="mb-4">
+              <label class="form-label fw-semibold small">Tech Stack & Tags</label>
+              {{ form.tags }}
+              {% if form.tags.errors %}<div class="text-danger small mt-1">{{ form.tags.errors.0 }}</div>{% endif %}
+              <div class="form-text small">{{ form.tags.help_text }}</div>
+            </div>
 
-          <button type="submit" class="btn btn-primary btn-lg w-100 fw-bold py-3 shadow">
-            Publish Opportunity
-          </button>
-        </form>
+            <div class="mb-4">
+              <label class="form-label fw-semibold small">Context & Step-by-Step Guidance <span class="text-danger">*</span></label>
+              {{ form.description }}
+              {% if form.description.errors %}<div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>{% endif %}
+              <div class="form-text small">Explain what files to look at, how to test locally, and any specific requirements.</div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 fw-semibold">
+              Publish Opportunity
+            </button>
+          </form>
+        </div>
+
       </div>
     </div>
   </div>

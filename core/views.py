@@ -34,12 +34,24 @@ def landing_page(request):
 
 @login_required
 def dashboard_view(request):
-    saved_issues = SavedIssue.objects.filter(user=request.user).select_related('issue', 'issue__repo')[:4]
-    total_saved = SavedIssue.objects.filter(user=request.user).count()
-    return render(request, 'core/dashboard.html', {
+    user = request.user
+    saved_qs = SavedIssue.objects.filter(user=user).select_related('issue', 'issue__repo')
+    saved_issues = saved_qs.order_by('-saved_at')[:4]
+    total_saved = saved_qs.count()
+    saved_repos_count = saved_qs.values('issue__repo').distinct().count()
+
+    context = {
         'saved_issues': saved_issues,
         'total_saved': total_saved,
-    })
+        'saved_repos_count': saved_repos_count,
+        'open_issues_count': Issue.objects.filter(status='open').count(),
+    }
+
+    if user.is_editor:
+        context['posted_issues_count'] = Issue.objects.filter(posted_by=user).count()
+        context['editor_repos_count'] = Repo.objects.filter(editor=user).count()
+
+    return render(request, 'core/dashboard.html', context)
 
 @login_required
 def saved_issues_list_view(request):
