@@ -3,140 +3,122 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-<style>
-  pre {
-  background: #212529;
-  border-radius: 0.5rem;
-  padding: 1.5rem !important;
-  margin: 0;
-}
-pre code.hljs {
-  overflow-x: auto;
-  background: transparent; /* avoid double background from .hljs */
-}
-</style>
 {% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <!-- Breadcrumb -->
-  <nav aria-label="breadcrumb" class="mb-3">
-    <ol class="breadcrumb small">
-      <li class="breadcrumb-item"><a href="/templates/" class="text-decoration-none">Template Library</a></li>
-      <li class="breadcrumb-item active" aria-current="page">{{ template.title }}</li>
-    </ol>
-  </nav>
+<div class="template-detail-page">
+  <div class="container-app">
 
-  <div class="row">
-    <!-- Main Content -->
-    <div class="col-lg-8">
-      <!-- Header -->
-      <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
-        <div>
-          <span class="badge bg-indigo bg-opacity-10 text-indigo fw-semibold mb-2">{{ template.get_category_display }}</span>
-          <h2 class="fw-bold mb-1">{{ template.title }}</h2>
-          <p class="text-muted mb-0">{{ template.description }}</p>
-          {% if template.tag_list %}
-            <div class="d-flex flex-wrap gap-1 mt-2">
-              {% for tag in template.tag_list %}
-                <span class="badge bg-light text-dark border small fw-normal">{{ tag }}</span>
+    <nav aria-label="breadcrumb" class="mb-4">
+      <ol class="breadcrumb small mb-0">
+        <li class="breadcrumb-item"><a href="/templates/">Template Library</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ template.title }}</li>
+      </ol>
+    </nav>
+
+    <div class="row g-4">
+      <div class="col-lg-8">
+        <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 gap-3">
+          <div>
+            <span class="template-card__type">{{ template.get_category_display }}</span>
+            <h1 class="template-detail-header__title">{{ template.title }}</h1>
+            <p class="text-meta text-muted mb-0">{{ template.description }}</p>
+            {% if template.tag_list %}
+              <div class="template-card__tags mt-3 mb-0">
+                {% for tag in template.tag_list %}
+                  <span class="template-tag">{{ tag }}</span>
+                {% endfor %}
+              </div>
+            {% endif %}
+          </div>
+          <div class="d-flex gap-2 flex-shrink-0">
+            <a href="/templates/" class="btn btn-outline-secondary btn-sm fw-semibold">← Back</a>
+            <button type="button" class="btn btn-primary btn-sm fw-semibold btn-copy" data-clipboard-text="{{ template.content }}">
+              <i class="bi bi-clipboard"></i> Copy
+            </button>
+            <button type="button" class="btn btn-outline-dark btn-sm fw-semibold" id="downloadBtn">
+              <i class="bi bi-download"></i> Download
+            </button>
+          </div>
+        </div>
+
+        <div class="template-code-block">
+          <div class="template-code-block__header">
+            <span><i class="bi bi-file-earmark me-1"></i>{{ template.title }}</span>
+            <span class="d-flex align-items-center gap-3">
+              <span>{{ template.tag_list|first|default:"Markdown" }}</span>
+              <span>{{ template.content|length }} chars</span>
+            </span>
+          </div>
+          <pre><code class="language-markdown">{{ template.content }}</code></pre>
+        </div>
+      </div>
+
+      <div class="col-lg-4">
+        <div class="template-sidebar-panel">
+          <h2 class="template-sidebar-panel__title"><i class="bi bi-info-circle text-indigo me-2"></i>Template Info</h2>
+          <div class="d-flex flex-column gap-3">
+            <div>
+              <span class="template-sidebar-panel__label">Category</span>
+              <span class="template-card__type">{{ template.get_category_display }}</span>
+            </div>
+            <div>
+              <span class="template-sidebar-panel__label">Tags</span>
+              <div class="template-card__tags mb-0 mt-1">
+                {% if template.tag_list %}
+                  {% for tag in template.tag_list %}
+                    <span class="template-tag">{{ tag }}</span>
+                  {% endfor %}
+                {% else %}
+                  <span class="text-meta text-muted">No tags</span>
+                {% endif %}
+              </div>
+            </div>
+            <div>
+              <span class="template-sidebar-panel__label">Content</span>
+              <div><span class="fw-bold">{{ template.content|length }}</span> <span class="text-meta text-muted">characters</span></div>
+            </div>
+            <div>
+              <span class="template-sidebar-panel__label">Updated</span>
+              <div><span class="fw-bold">{{ template.updated_at|date:"M j, Y" }}</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="template-sidebar-panel">
+          <h2 class="template-sidebar-panel__title"><i class="bi bi-tools text-indigo me-2"></i>Actions</h2>
+          <div class="d-flex flex-column gap-2">
+            <button type="button" class="btn btn-primary btn-copy fw-semibold w-100" data-clipboard-text="{{ template.content }}">
+              <i class="bi bi-clipboard"></i> Copy to Clipboard
+            </button>
+            <button type="button" class="btn btn-outline-dark fw-semibold w-100" id="downloadBtn2">
+              <i class="bi bi-download"></i> Download File
+            </button>
+            <a href="/templates/" class="btn btn-outline-secondary fw-semibold w-100">
+              <i class="bi bi-arrow-left"></i> Back to Library
+            </a>
+          </div>
+        </div>
+
+        {% if related_templates %}
+          <div class="template-sidebar-panel mb-0">
+            <h2 class="template-sidebar-panel__title"><i class="bi bi-link-45deg text-indigo me-2"></i>Related Templates</h2>
+            <div class="d-flex flex-column gap-2">
+              {% for related in related_templates %}
+                <a href="/templates/{{ related.slug }}/" class="template-related-link">
+                  <span class="template-related-link__icon"><i class="bi bi-file-earmark-text"></i></span>
+                  <span>
+                    <div class="small fw-semibold text-dark">{{ related.title }}</div>
+                    <span class="template-tag">{{ related.get_category_display }}</span>
+                  </span>
+                </a>
               {% endfor %}
             </div>
-          {% endif %}
-        </div>
-        <div class="d-flex gap-2 flex-shrink-0">
-          <a href="/templates/" class="btn btn-outline-secondary btn-sm fw-semibold">← Back</a>
-          <button type="button" class="btn btn-primary btn-sm px-4 fw-semibold btn-copy" data-clipboard-text="{{ template.content }}">
-            <i class="bi bi-clipboard me-1"></i>Copy
-          </button>
-          <button type="button" class="btn btn-outline-dark btn-sm px-3 fw-semibold" id="downloadBtn">
-            <i class="bi bi-download me-1"></i>Download
-          </button>
-        </div>
-      </div>
-
-      <!-- Template Content with Syntax Highlighting -->
-      <div class="card shadow-sm border-0 bg-dark text-light rounded-3 position-relative overflow-hidden">
-        <div class="d-flex justify-content-between align-items-center px-4 py-3 border-bottom border-secondary border-opacity-25 small text-muted font-monospace">
-          <span><i class="bi bi-file-earmark me-1"></i>{{ template.title }}</span>
-          <span class="d-flex align-items-center gap-3">
-            <span>{{ template.tag_list|first|default:"Markdown" }}</span>
-            <span>{{ template.content|length }} chars</span>
-          </span>
-        </div>
-        <pre class="mb-0"><code class="language-markdown">{{ template.content }}</code></pre>
+          </div>
+        {% endif %}
       </div>
     </div>
 
-    <!-- Sidebar -->
-    <div class="col-lg-4">
-      <!-- Template Info Card -->
-      <div class="card shadow-sm border-0 p-4 mb-4">
-        <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Template Info</h6>
-        <div class="d-flex flex-column gap-3">
-          <div>
-            <span class="text-muted small text-uppercase fw-semibold">Category</span>
-            <div><span class="badge bg-indigo bg-opacity-10 text-indigo mt-1">{{ template.get_category_display }}</span></div>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-semibold">Tags</span>
-            <div class="d-flex flex-wrap gap-1 mt-1">
-              {% if template.tag_list %}
-                {% for tag in template.tag_list %}
-                  <span class="badge bg-light text-dark border small fw-normal">{{ tag }}</span>
-                {% endfor %}
-              {% else %}
-                <span class="text-muted small">No tags</span>
-              {% endif %}
-            </div>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-semibold">Content</span>
-            <div class="mt-1"><span class="fw-bold">{{ template.content|length }}</span> <span class="text-muted small">characters</span></div>
-          </div>
-          <div>
-            <span class="text-muted small text-uppercase fw-semibold">Updated</span>
-            <div class="mt-1"><span class="fw-bold">{{ template.updated_at|date:"M j, Y" }}</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Actions Card -->
-      <div class="card shadow-sm border-0 p-4 mb-4">
-        <h6 class="fw-bold mb-3"><i class="bi bi-tools me-2"></i>Actions</h6>
-        <div class="d-flex flex-column gap-2">
-          <button type="button" class="btn btn-primary btn-copy fw-semibold w-100" data-clipboard-text="{{ template.content }}">
-            <i class="bi bi-clipboard me-1"></i>Copy to Clipboard
-          </button>
-          <button type="button" class="btn btn-outline-dark fw-semibold w-100" id="downloadBtn2">
-            <i class="bi bi-download me-1"></i>Download File
-          </button>
-          <a href="/templates/" class="btn btn-outline-secondary fw-semibold w-100">
-            <i class="bi bi-arrow-left me-1"></i>Back to Library
-          </a>
-        </div>
-      </div>
-
-      <!-- Related Templates -->
-      {% if related_templates %}
-        <div class="card shadow-sm border-0 p-4">
-          <h6 class="fw-bold mb-3"><i class="bi bi-link me-2"></i>Related Templates</h6>
-          <div class="d-flex flex-column gap-2">
-            {% for related in related_templates %}
-              <a href="/templates/{{ related.slug }}/" class="text-decoration-none">
-                <div class="d-flex align-items-center gap-2 p-2 rounded hover-bg-light">
-                  <i class="bi bi-file-earmark-text text-muted"></i>
-                  <div>
-                    <div class="small fw-semibold text-dark">{{ related.title }}</div>
-                    <span class="badge bg-indigo bg-opacity-10 text-indigo" style="font-size: 0.65rem;">{{ related.get_category_display }}</span>
-                  </div>
-                </div>
-              </a>
-            {% endfor %}
-          </div>
-        </div>
-      {% endif %}
-    </div>
   </div>
 </div>
 {% endblock %}

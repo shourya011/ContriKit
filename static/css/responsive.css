@@ -228,6 +228,15 @@
     padding-block: 32px 24px;
   }
 
+  .template-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .template-toolbar__count {
+    text-align: left;
+    padding-bottom: 0;
+  }
+
   .dashboard-header {
     flex-direction: column;
     align-items: stretch;

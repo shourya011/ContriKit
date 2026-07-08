@@ -2,107 +2,111 @@
 {% block title %}Template Library — ContribKit{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-  <div class="text-center mb-5">
-    <span class="section-eyebrow">📦 Curated Open Source Files</span>
-    <h1 class="fw-extrabold">Repository Template Library</h1>
-    <p class="text-muted mx-auto" style="max-width: 650px;">Copy-paste-ready markdown templates for GitHub repositories — community health, documentation, contributing guides, issue templates, PR templates, and CI/CD workflows.</p>
-  </div>
+<div class="template-library-page">
+  <div class="container-app">
 
-  <!-- Search & Filter Bar -->
-  <div class="row g-3 mb-4 align-items-end">
-    <div class="col-md-5">
+    <header class="template-library-header">
+      <span class="section-eyebrow"><i class="bi bi-folder2-open"></i> Curated Open Source Files</span>
+      <h1 class="template-library-header__title">Repository Template Library</h1>
+      <p class="template-library-header__desc">Copy-paste-ready markdown templates for GitHub repositories — community health, documentation, contributing guides, issue templates, PR templates, and CI/CD workflows.</p>
+    </header>
+
+    <div class="template-toolbar">
       <form method="GET" action="/templates/" id="searchForm">
         {% if selected_category and selected_category != 'all' %}
           <input type="hidden" name="category" value="{{ selected_category }}">
         {% endif %}
         <input type="hidden" name="sort" value="{{ current_sort }}">
-        <div class="search-input-group input-group">
-          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
-          <input type="text" name="q" class="form-control border-start-0 ps-0" placeholder="Search templates by name, category, or tag..." value="{{ search_query }}">
+        <label class="form-label small fw-semibold text-muted mb-1 d-none d-md-block">Search</label>
+        <div class="template-search">
+          <i class="bi bi-search template-search__icon"></i>
+          <input type="text" name="q" placeholder="Search by name, category, or tag..." value="{{ search_query }}" aria-label="Search templates">
           {% if search_query %}
-            <a href="/templates/" class="btn btn-outline-secondary border-start-0"><i class="bi bi-x-lg"></i></a>
+            <a href="/templates/" class="template-search__clear" aria-label="Clear search"><i class="bi bi-x-lg"></i></a>
           {% endif %}
         </div>
       </form>
-    </div>
-    <div class="col-md-3">
-      <select class="form-select" id="categoryFilter" onchange="filterByCategory(this.value)">
-        <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
-        {% for val, label in categories %}
-          <option value="{{ val }}" {% if selected_category == val %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-    </div>
-    <div class="col-md-2">
-      <select class="form-select" id="sortSelect" onchange="sortTemplates(this.value)">
-        <option value="category" {% if current_sort == 'category' %}selected{% endif %}>By Category</option>
-        <option value="alpha" {% if current_sort == 'alpha' %}selected{% endif %}>Alphabetical</option>
-        <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
-      </select>
-    </div>
-    <div class="col-md-2 text-md-end">
-      <span class="text-muted small fw-medium">{{ templates.count }} template{% if templates.count != 1 %}s{% endif %}</span>
-    </div>
-  </div>
 
-  {% if templates %}
-    <div class="row g-4">
-      {% for tmpl in templates %}
-        <div class="col-md-6 col-lg-4">
-          <div class="card h-100 card-hover p-4 d-flex flex-column shadow-sm bg-white border-0">
-            <div class="d-flex justify-content-between align-items-center mb-3">
-              <span class="badge bg-indigo bg-opacity-10 text-indigo fw-semibold">{{ tmpl.get_category_display }}</span>
-              <i class="bi bi-file-earmark-code fs-4 text-muted"></i>
+      <div>
+        <label class="form-label small fw-semibold text-muted mb-1" for="categoryFilter">Category</label>
+        <select class="form-select" id="categoryFilter" onchange="filterByCategory(this.value)">
+          <option value="all" {% if selected_category == 'all' %}selected{% endif %}>All Categories</option>
+          {% for val, label in categories %}
+            <option value="{{ val }}" {% if selected_category == val %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="form-label small fw-semibold text-muted mb-1" for="sortSelect">Sort</label>
+        <select class="form-select" id="sortSelect" onchange="sortTemplates(this.value)">
+          <option value="category" {% if current_sort == 'category' %}selected{% endif %}>By Category</option>
+          <option value="alpha" {% if current_sort == 'alpha' %}selected{% endif %}>Alphabetical</option>
+          <option value="newest" {% if current_sort == 'newest' %}selected{% endif %}>Newest</option>
+        </select>
+      </div>
+
+      <div class="template-toolbar__count">
+        {{ templates.count }} template{% if templates.count != 1 %}s{% endif %}
+      </div>
+    </div>
+
+    {% if templates %}
+      <div class="templates-grid">
+        {% for tmpl in templates %}
+          <article class="template-card card-hover">
+            <div class="template-card__header">
+              <span class="template-card__type">{{ tmpl.get_category_display }}</span>
+              <i class="bi bi-file-earmark-code template-card__icon"></i>
             </div>
 
-            <h4 class="fw-bold mb-2">
-              <a href="/templates/{{ tmpl.slug }}/" class="text-dark text-decoration-none">{{ tmpl.title }}</a>
-            </h4>
-            <p class="text-muted small mb-3 flex-grow-1">{{ tmpl.description }}</p>
+            <h2 class="template-card__title">
+              <a href="/templates/{{ tmpl.slug }}/">{{ tmpl.title }}</a>
+            </h2>
+            <p class="template-card__desc">{{ tmpl.description }}</p>
 
             {% if tmpl.tag_list %}
-              <div class="d-flex flex-wrap gap-1 mb-3">
+              <div class="template-card__tags">
                 {% for tag in tmpl.tag_list|slice:":4" %}
-                  <span class="badge bg-light text-dark border small fw-normal">{{ tag }}</span>
+                  <span class="template-tag">{{ tag }}</span>
                 {% endfor %}
                 {% if tmpl.tag_list|length > 4 %}
-                  <span class="badge bg-light text-muted border small fw-normal">+{{ tmpl.tag_list|length|add:"-4" }}</span>
+                  <span class="template-tag">+{{ tmpl.tag_list|length|add:"-4" }}</span>
                 {% endif %}
               </div>
             {% endif %}
 
-            <div class="bg-dark text-light p-3 rounded small mb-4 font-monospace position-relative" style="height: 100px; overflow: hidden; opacity: 0.9;">
-              {{ tmpl.preview|slice:":200" }}
-            </div>
+            <div class="template-card__preview">{{ tmpl.preview }}</div>
 
-            <div class="d-flex justify-content-between align-items-center mt-auto pt-3 border-top">
-              <a href="/templates/{{ tmpl.slug }}/" class="btn btn-sm btn-outline-dark fw-semibold">View Full Template →</a>
-              <button type="button" class="btn btn-sm btn-primary btn-copy fw-semibold" data-clipboard-text="{{ tmpl.content }}">
-                <i class="bi bi-clipboard me-1"></i>Copy
+            <div class="template-card__footer">
+              <a href="/templates/{{ tmpl.slug }}/" class="btn btn-ghost btn-sm">View Template <i class="bi bi-arrow-right"></i></a>
+              <button type="button" class="btn btn-primary btn-sm btn-copy" data-clipboard-text="{{ tmpl.content }}">
+                <i class="bi bi-clipboard"></i> Copy
               </button>
             </div>
-          </div>
-        </div>
-      {% endfor %}
-    </div>
-  {% else %}
-    <div class="empty-state">
-      <div class="empty-state-icon"><i class="bi bi-folder2-open"></i></div>
-      <h4>No templates found</h4>
-      <p class="text-muted">
-        {% if search_query %}
-          No templates match your search query "<strong>{{ search_query }}</strong>".
-          <br><a href="/templates/" class="btn btn-primary btn-sm mt-2">Clear Search</a>
-        {% elif selected_category and selected_category != 'all' %}
-          No templates in this category yet.
-          <br><a href="/templates/" class="btn btn-primary btn-sm mt-2">View All Templates</a>
-        {% else %}
-          The template library is empty. Run <code>python manage.py seed_data</code> to populate it.
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="dashboard-empty">
+        <div class="dashboard-empty__icon"><i class="bi bi-folder2-open"></i></div>
+        <h4 class="text-card-title mb-2">No templates found</h4>
+        <p class="text-meta text-muted mb-3" style="max-width:420px;">
+          {% if search_query %}
+            No templates match "<strong>{{ search_query }}</strong>". Try a different search term or browse all categories.
+          {% elif selected_category and selected_category != 'all' %}
+            No templates in this category yet. Browse the full library to find other useful files.
+          {% else %}
+            The template library is empty. Run <code>python manage.py seed_data</code> to populate it.
+          {% endif %}
+        </p>
+        {% if search_query or selected_category and selected_category != 'all' %}
+          <a href="/templates/" class="btn btn-primary btn-sm">View All Templates</a>
         {% endif %}
-      </p>
-    </div>
-  {% endif %}
+      </div>
+    {% endif %}
+
+  </div>
 </div>
 {% endblock %}
 
