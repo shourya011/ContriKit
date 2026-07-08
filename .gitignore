@@ -42,3 +42,6 @@ staticfiles/
 
 # Python version (if you use pyenv)
 .python-version
+
+
+DEPLOYMENT_GUIDE.md
