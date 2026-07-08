@@ -2,13 +2,13 @@
 {% block title %}Dashboard — ContribKit{% endblock %}
 
 {% block content %}
-<div class="container-app" style="padding-bottom:64px;">
-  <!-- Welcome Banner -->
-  <div class="card p-4 bg-white shadow-sm mb-4 border-0">
-    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+<div class="dashboard-page">
+  <div class="container-app">
+
+    <header class="dashboard-header">
       <div>
-        <div class="d-flex align-items-center gap-2 mb-1">
-          <h2 class="fw-bold mb-0">Hello, {{ user.username }}!</h2>
+        <div class="d-flex align-items-center gap-2 flex-wrap mb-1">
+          <h1 class="dashboard-header__title mb-0">Hello, {{ user.username }}!</h1>
           {% if is_platform_admin %}
             <span class="badge bg-danger badge-role">Admin</span>
           {% elif is_editor %}
@@ -17,87 +17,164 @@
             <span class="badge bg-secondary badge-role">Viewer</span>
           {% endif %}
         </div>
-        <p class="text-muted mb-0">Welcome to your personal contributor hub.</p>
+        <p class="dashboard-header__desc">
+          {% if total_saved %}
+            You have {{ total_saved }} saved issue{{ total_saved|pluralize }} across {{ saved_repos_count }} repositor{{ saved_repos_count|pluralize:"y,ies" }}.
+          {% else %}
+            Welcome to your contributor hub — save issues to track opportunities you want to tackle.
+          {% endif %}
+        </p>
       </div>
-
-      <div>
+      <div class="flex-shrink-0">
         {% if not is_editor %}
-          <button type="button" class="btn btn-primary fw-semibold shadow-sm" data-bs-toggle="modal" data-bs-target="#upgradeModal">
-            <i class="bi bi-rocket-takeoff me-2"></i>Become an Editor
+          <button type="button" class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#upgradeModal">
+            <i class="bi bi-rocket-takeoff"></i> Become an Editor
           </button>
         {% else %}
-          <a href="/editor/repos/" class="btn btn-primary fw-semibold shadow-sm">
-            <i class="bi bi-code-square me-2"></i>Editor Hub
+          <a href="/editor/repos/" class="btn btn-primary fw-semibold">
+            <i class="bi bi-code-square"></i> Editor Hub
           </a>
         {% endif %}
       </div>
-    </div>
-  </div>
+    </header>
 
-  <!-- Dashboard Grid -->
-  <div class="row g-4 mb-4">
-    <div class="col-md-6">
-      <div class="card p-4 h-100 bg-white shadow-sm">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h5 class="fw-bold mb-0"><i class="bi bi-bookmark-fill text-indigo me-2"></i>Saved Issues Preview</h5>
-          <a href="/dashboard/saved/" class="small text-decoration-none fw-semibold">View All ({{ total_saved }}) →</a>
+    <div class="row g-3 mb-4">
+      <div class="col-sm-6 col-lg-3">
+        <div class="dashboard-stat">
+          <div class="dashboard-stat__icon bg-indigo bg-opacity-10 text-indigo">
+            <i class="bi bi-bookmark-fill"></i>
+          </div>
+          <div>
+            <div class="dashboard-stat__value">{{ total_saved }}</div>
+            <p class="dashboard-stat__label">Saved Issues</p>
+          </div>
         </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="dashboard-stat">
+          <div class="dashboard-stat__icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-folder2"></i>
+          </div>
+          <div>
+            <div class="dashboard-stat__value">{{ saved_repos_count }}</div>
+            <p class="dashboard-stat__label">Tracked Repos</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-sm-6 col-lg-3">
+        <div class="dashboard-stat">
+          <div class="dashboard-stat__icon bg-warning bg-opacity-10 text-warning">
+            <i class="bi bi-search"></i>
+          </div>
+          <div>
+            <div class="dashboard-stat__value">{{ open_issues_count }}</div>
+            <p class="dashboard-stat__label">Open Opportunities</p>
+          </div>
+        </div>
+      </div>
+      {% if is_editor %}
+      <div class="col-sm-6 col-lg-3">
+        <div class="dashboard-stat">
+          <div class="dashboard-stat__icon bg-indigo bg-opacity-10 text-indigo">
+            <i class="bi bi-megaphone"></i>
+          </div>
+          <div>
+            <div class="dashboard-stat__value">{{ posted_issues_count }}</div>
+            <p class="dashboard-stat__label">Posted Issues</p>
+          </div>
+        </div>
+      </div>
+      {% else %}
+      <div class="col-sm-6 col-lg-3">
+        <a href="/issues/" class="dashboard-stat text-decoration-none">
+          <div class="dashboard-stat__icon bg-indigo bg-opacity-10 text-indigo">
+            <i class="bi bi-compass"></i>
+          </div>
+          <div>
+            <div class="dashboard-stat__value"><i class="bi bi-arrow-right"></i></div>
+            <p class="dashboard-stat__label">Browse Issues</p>
+          </div>
+        </a>
+      </div>
+      {% endif %}
+    </div>
 
-        <div id="savedIssuesPreview">
-          {% if saved_issues %}
-            <div class="d-flex flex-column gap-3">
-              {% for item in saved_issues %}
-                <div class="p-3 border rounded card-hover bg-light d-flex justify-content-between align-items-center">
-                  <div>
-                    <span class="badge bg-secondary small mb-1">{{ item.issue.repo.name }}</span>
-                    <h6 class="fw-bold mb-1"><a href="/issues/{{ item.issue.id }}/" class="text-dark text-decoration-none">{{ item.issue.title }}</a></h6>
-                    <small class="text-muted"><i class="bi bi-clock me-1"></i>~{{ item.issue.estimated_hours }}h</small>
+    <div class="row g-4">
+      <div class="col-lg-7">
+        <div class="dashboard-panel">
+          <div class="dashboard-panel__header">
+            <h2 class="dashboard-panel__title">
+              <i class="bi bi-bookmark-fill text-indigo me-2"></i>Saved Issues
+            </h2>
+            <a href="/dashboard/saved/" class="small text-indigo text-decoration-none fw-semibold">
+              View All ({{ total_saved }}) →
+            </a>
+          </div>
+
+          <div id="savedIssuesPreview">
+            {% if saved_issues %}
+              <div class="d-flex flex-column gap-3">
+                {% for item in saved_issues %}
+                  <div class="p-3 border rounded card-hover bg-light d-flex justify-content-between align-items-center">
+                    <div>
+                      <span class="badge bg-secondary small mb-1">{{ item.issue.repo.name }}</span>
+                      <h6 class="fw-bold mb-1"><a href="/issues/{{ item.issue.id }}/" class="text-dark text-decoration-none">{{ item.issue.title }}</a></h6>
+                      <small class="text-muted"><i class="bi bi-clock me-1"></i>~{{ item.issue.estimated_hours }}h</small>
+                    </div>
+                    <a href="{{ item.issue.github_issue_url }}" target="_blank" class="btn btn-sm btn-outline-dark" data-bs-toggle="tooltip" title="Open on GitHub">
+                      <i class="bi bi-github"></i>
+                    </a>
                   </div>
-                  <a href="{{ item.issue.github_issue_url }}" target="_blank" class="btn btn-sm btn-outline-dark" data-bs-toggle="tooltip" title="Open on GitHub">
-                    <i class="bi bi-github"></i>
-                  </a>
-                </div>
-              {% endfor %}
-            </div>
-          {% else %}
-            <div class="empty-state my-2 py-4">
-              <i class="bi bi-bookmark text-muted fs-2"></i>
-              <p class="small text-muted mt-2 mb-0">You haven't saved any issues yet.</p>
-              <a href="/issues/" class="btn btn-sm btn-outline-primary mt-2">Browse Issues</a>
-            </div>
-          {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="dashboard-empty">
+                <div class="dashboard-empty__icon"><i class="bi bi-bookmark"></i></div>
+                <h4 class="text-card-title mb-2">No saved issues yet</h4>
+                <p class="text-meta text-muted mb-3" style="max-width:360px;">
+                  Bookmark beginner-friendly issues while browsing — they'll show up here so you can pick up where you left off.
+                </p>
+                <a href="/issues/" class="btn btn-primary btn-sm">
+                  <i class="bi bi-search"></i> Browse Issues
+                </a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-5">
+        <div class="dashboard-panel">
+          <h2 class="dashboard-panel__title mb-3">
+            <i class="bi bi-compass-fill text-indigo me-2"></i>Quick Navigation
+          </h2>
+          <div class="d-flex flex-column gap-3">
+            <a href="/issues/" class="dashboard-nav-link">
+              <span class="dashboard-nav-link__icon"><i class="bi bi-search"></i></span>
+              <span>
+                <div class="dashboard-nav-link__title">Explore Beginner Issues</div>
+                <p class="dashboard-nav-link__desc">Filter by language, difficulty, and tech tags</p>
+              </span>
+            </a>
+            <a href="/templates/" class="dashboard-nav-link">
+              <span class="dashboard-nav-link__icon"><i class="bi bi-file-earmark-code"></i></span>
+              <span>
+                <div class="dashboard-nav-link__title">Copy Repo Templates</div>
+                <p class="dashboard-nav-link__desc">README, CONTRIBUTING.md, and PR templates</p>
+              </span>
+            </a>
+            <a href="/cheatsheet/" class="dashboard-nav-link">
+              <span class="dashboard-nav-link__icon"><i class="bi bi-terminal"></i></span>
+              <span>
+                <div class="dashboard-nav-link__title">Git Command Cheat Sheet</div>
+                <p class="dashboard-nav-link__desc">Searchable workflows for branching and commits</p>
+              </span>
+            </a>
+          </div>
         </div>
       </div>
     </div>
 
-    <div class="col-md-6">
-      <div class="card p-4 h-100 bg-white shadow-sm">
-        <h5 class="fw-bold mb-3"><i class="bi bi-compass-fill text-indigo me-2"></i>Quick Navigation</h5>
-        <div class="d-flex flex-column gap-2">
-          <a href="/issues/" class="p-3 border rounded text-decoration-none text-dark d-flex align-items-center gap-3 card-hover bg-light">
-            <i class="bi bi-search fs-4 text-indigo"></i>
-            <div>
-              <div class="fw-bold">Explore Beginner Issues</div>
-              <div class="small text-muted">Filter by language, difficulty, and tech tags</div>
-            </div>
-          </a>
-          <a href="/templates/" class="p-3 border rounded text-decoration-none text-dark d-flex align-items-center gap-3 card-hover bg-light">
-            <i class="bi bi-file-earmark-code fs-4 text-indigo"></i>
-            <div>
-              <div class="fw-bold">Copy Repo Templates</div>
-              <div class="small text-muted">README, CONTRIBUTING.md, and PR templates</div>
-            </div>
-          </a>
-          <a href="/cheatsheet/" class="p-3 border rounded text-decoration-none text-dark d-flex align-items-center gap-3 card-hover bg-light">
-            <i class="bi bi-terminal fs-4 text-indigo"></i>
-            <div>
-              <div class="fw-bold">Git Command Cheat Sheet</div>
-              <div class="small text-muted">Searchable workflows for branching and commits</div>
-            </div>
-          </a>
-        </div>
-      </div>
-    </div>
   </div>
 </div>
 
