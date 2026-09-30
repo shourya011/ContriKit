@@ -1,5 +1,5 @@
 from .base import *
-from decouple import config, Csv
+from decouple import Csv
 
 # SECRET_KEY: MUST be set in environment. No default fallback for production.
 SECRET_KEY = config('SECRET_KEY')

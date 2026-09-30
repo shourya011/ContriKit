@@ -4,6 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  {# CSRF token for the same-origin fetch() calls (AI chat, issue bookmark).  #}
+  {# Publishing it in the page means the JavaScript never depends on being    #}
+  {# able to read document.cookie (HttpOnly cookie, cookie blockers, cleared  #}
+  {# storage), and rendering it keeps Django issuing the csrftoken cookie on  #}
+  {# every response. Read it with getCsrfToken() in static/js/main.js.        #}
+  <meta name="csrf-token" content="{{ csrf_token }}">
   <title>{% block title %}ContribKit — Open Source Contribution Bridge{% endblock %}</title>
 
   <!-- Fonts -->
@@ -22,6 +29,7 @@
   <link rel="stylesheet" href="{% static 'css/components/hero.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/cards.css' %}">
   <link rel="stylesheet" href="{% static 'css/components/footer.css' %}">
+  <link rel="stylesheet" href="{% static 'css/components/chat.css' %}">
   <link rel="stylesheet" href="{% static 'css/responsive.css' %}">
 
   {% block extra_css %}{% endblock %}
@@ -47,11 +55,14 @@
 
   {% include 'includes/footer.html' %}
 
+  {% include 'ai/widget.html' %}
+
   <div id="toastContainer" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="{% static 'js/main.js' %}"></script>
+  <script src="{% static 'js/ai_chat.js' %}"></script>
   {% block extra_js %}{% endblock %}
 </body>
 </html>

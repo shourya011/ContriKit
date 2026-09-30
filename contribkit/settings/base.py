@@ -1,8 +1,4 @@
-import os
-from pathlib import Path
-from decouple import config
-
-BASE_DIR = Path(__file__).resolve().parent.parent.parent
+from ._env import BASE_DIR, config
 
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key-contribkit-2026')
 
@@ -25,6 +21,7 @@ INSTALLED_APPS = [
     'templates_app',
     'cheatsheet',
     'core',
+    'ai',
 ]
 
 MIDDLEWARE = [
@@ -53,6 +50,13 @@ TEMPLATES = [
             'context_processors': [
                 'django.template.context_processors.debug',
                 'django.template.context_processors.request',
+                # Publishes `{{ csrf_token }}` to every template. base.html
+                # renders it into <meta name="csrf-token"> so the same-origin
+                # fetch() calls (AI chat, issue bookmark) can read a token
+                # without depending on document.cookie. This is one of
+                # Django's default context processors; without it the
+                # variable renders as an empty string.
+                'django.template.context_processors.csrf',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'core.context_processors.role_context',
@@ -151,6 +155,11 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.profile',
 ]
 
+# Optional GitHub Personal Access Token (PAT) for higher rate limits
+# (5000/hr instead of 60/hr). Used server-side by repos.github_api and the
+# AI GitHub tools; never exposed to templates or JavaScript.
+GITHUB_PAT = config('GITHUB_PAT', default='')
+
 # Where social auth should land / start / go on failure.
 SOCIAL_AUTH_LOGIN_URL = '/accounts/login/'
 SOCIAL_AUTH_LOGIN_REDIRECT_URL = '/dashboard/'
@@ -191,3 +200,39 @@ SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.load_extra_data',
     'social_core.pipeline.user.user_details',
 )
+
+# ---------------------------------------------------------------------------
+# AI Contribution Assistant (backend service layer)
+#
+# The `ai` app talks to Groq from the server only; AI_GROQ_API_KEY is read
+# from the environment (.env) and is never exposed to templates or JavaScript.
+# Groq is the only LLM backend. OpenAI, Gemini, and Anthropic are not used.
+# ---------------------------------------------------------------------------
+AI_PROVIDERS = config('AI_PROVIDERS', default='groq')
+AI_PROVIDER = config('AI_PROVIDER', default='groq')
+
+# Router behavior (retries / circuit breaker around Groq)
+AI_PROVIDER_FALLBACK = config('AI_PROVIDER_FALLBACK', default=True, cast=bool)
+AI_PROVIDER_RETRIES = config('AI_PROVIDER_RETRIES', default=2, cast=int)
+AI_PROVIDER_RETRY_BACKOFF = config('AI_PROVIDER_RETRY_BACKOFF', default=0.5, cast=float)
+AI_PROVIDER_CIRCUIT_BREAKER = config('AI_PROVIDER_CIRCUIT_BREAKER', default=True, cast=bool)
+AI_PROVIDER_CIRCUIT_FAILURE_THRESHOLD = config('AI_PROVIDER_CIRCUIT_FAILURE_THRESHOLD', default=3, cast=int)
+AI_PROVIDER_CIRCUIT_RESET_SECONDS = config('AI_PROVIDER_CIRCUIT_RESET_SECONDS', default=60, cast=int)
+
+# ── Groq ──────────────────────────────────────────────────────────────────
+# Groq hosts open models at api.groq.com. Keys start with gsk_.
+# Default model: openai/gpt-oss-120b (llama-3.3-70b-versatile retired 2026-08-16).
+AI_GROQ_API_KEY = config('AI_GROQ_API_KEY', default='')
+AI_GROQ_BASE_URL = config('AI_GROQ_BASE_URL', default='https://api.groq.com/openai/v1')
+AI_GROQ_MODEL = config('AI_GROQ_MODEL', default='openai/gpt-oss-120b')
+AI_GROQ_TIMEOUT = config('AI_GROQ_TIMEOUT', default=60, cast=int)
+AI_GROQ_MAX_TOKENS = config('AI_GROQ_MAX_TOKENS', default=1024, cast=int)
+AI_GROQ_TEMPERATURE = config('AI_GROQ_TEMPERATURE', default=0.7, cast=float)
+AI_GROQ_PRIORITY = config('AI_GROQ_PRIORITY', default=10, cast=int)
+AI_GROQ_RATE_LIMIT = config('AI_GROQ_RATE_LIMIT', default=0, cast=int)
+
+# AI chat endpoint (works with the existing Django session — no DB changes)
+AI_CHAT_RATE_LIMIT = config('AI_CHAT_RATE_LIMIT', default=10, cast=int)
+AI_CHAT_RATE_WINDOW = config('AI_CHAT_RATE_WINDOW', default=60, cast=int)
+AI_CHAT_MAX_MESSAGE_LENGTH = config('AI_CHAT_MAX_MESSAGE_LENGTH', default=2000, cast=int)
+AI_CHAT_HISTORY_LIMIT = config('AI_CHAT_HISTORY_LIMIT', default=12, cast=int)

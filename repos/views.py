@@ -1,21 +1,13 @@
-import requests
-from urllib.parse import urlparse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.db.models import Count, Sum
-from django.db.models.functions import TruncDate
 from core.decorators import editor_required
 from .models import Repo
 from .forms import RepoForm
+from .github_api import fetch_github_issues_api, get_repository, parse_github_url
 from issues.models import Issue, Tag, SavedIssue
 from issues.forms import IssueForm
 
-def parse_github_url(url):
-    parsed = urlparse(url)
-    parts = [p for p in parsed.path.strip('/').split('/') if p]
-    if len(parts) >= 2:
-        return parts[0], parts[1]
-    return None, None
 
 @editor_required
 def repos_list_view(request):
@@ -31,27 +23,20 @@ def repos_list_view(request):
             if not owner or not repo_name:
                 form.add_error('github_url', "Invalid GitHub repository URL format.")
             else:
-                try:
-                    resp = requests.get(f"https://api.github.com/repos/{owner}/{repo_name}", timeout=10)
-                    if resp.status_code == 200:
-                        data = resp.json()
-                        repo_obj = form.save(commit=False)
-                        repo_obj.editor = request.user
-                        repo_obj.name = data.get('full_name') or f"{owner}/{repo_name}"
-                        repo_obj.stars = data.get('stargazers_count', 0)
-                        repo_obj.language = data.get('language') or ""
-                        repo_obj.description = data.get('description') or ""
-                        repo_obj.save()
-                        messages.success(request, f"Successfully linked repository: {repo_obj.name}!")
-                        return redirect('/editor/repos/')
-                    elif resp.status_code == 404:
-                        form.add_error('github_url', "We couldn't find that repository — check the URL and try again.")
-                    elif resp.status_code == 403 and resp.headers.get('X-RateLimit-Remaining') == '0':
-                        form.add_error('github_url', "GitHub rate limit reached, please try again in a few minutes.")
-                    else:
-                        form.add_error('github_url', f"GitHub API error (Status {resp.status_code}).")
-                except requests.RequestException:
-                    form.add_error('github_url', "Network timeout contacting GitHub API. Please try again.")
+                result = get_repository(owner, repo_name)
+                if result['ok']:
+                    data = result['data']
+                    repo_obj = form.save(commit=False)
+                    repo_obj.editor = request.user
+                    repo_obj.name = data.get('full_name') or f"{owner}/{repo_name}"
+                    repo_obj.stars = data.get('stargazers_count', 0)
+                    repo_obj.language = data.get('language') or ""
+                    repo_obj.description = data.get('description') or ""
+                    repo_obj.save()
+                    messages.success(request, f"Successfully linked repository: {repo_obj.name}!")
+                    return redirect('/editor/repos/')
+                else:
+                    form.add_error('github_url', result['error'])
     else:
         form = RepoForm()
 
@@ -137,42 +122,6 @@ def issue_edit_view(request, id):
         form = IssueForm(request.user, instance=issue)
 
     return render(request, 'repos/issue_form.html', {'form': form, 'title': 'Edit Issue', 'issue': issue})
-
-BEGINNER_LABELS = ["good first issue", "good-first-issue", "beginner", "easy", "starter"]
-
-def fetch_github_issues_api(owner, repo, github_pat=None):
-    headers = {"Accept": "application/vnd.github.v3+json"}
-    if github_pat:
-        headers["Authorization"] = f"token {github_pat}"
-
-    all_issues, seen_ids = [], set()
-    for label in BEGINNER_LABELS:
-        try:
-            resp = requests.get(
-                f"https://api.github.com/repos/{owner}/{repo}/issues",
-                params={"labels": label, "state": "open", "per_page": 30},
-                headers=headers,
-                timeout=10,
-            )
-            if resp.status_code != 200:
-                continue
-            for issue in resp.json():
-                if "pull_request" in issue:
-                    continue
-                if issue["id"] not in seen_ids:
-                    seen_ids.add(issue["id"])
-                    all_issues.append({
-                        "github_id": issue["id"],
-                        "title": issue["title"],
-                        "body": issue["body"] or "",
-                        "url": issue["html_url"],
-                        "comments": issue["comments"],
-                        "created_at": issue["created_at"],
-                        "labels": [l["name"] for l in issue["labels"]],
-                    })
-        except requests.RequestException:
-            continue
-    return all_issues
 
 @editor_required
 def bulk_import_view(request):

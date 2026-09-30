@@ -1,0 +1,71 @@
+{% load static %}
+{# AI Contribution Assistant — floating widget, included globally in base.html. #}
+{# Page/issue context is resolved server-side from request.path; the widget only #}
+{# sends the user's message. No provider keys ever reach this markup. #}
+<div class="ai-chat" id="aiChat"
+     data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
+     data-login-url="{% url 'login' %}?next={{ request.path|urlencode }}">
+
+  <button type="button" class="ai-chat__fab" id="aiChatFab"
+          aria-label="Open AI Contribution Assistant" aria-expanded="false">
+    <i class="bi bi-stars" aria-hidden="true"></i>
+  </button>
+
+  <section class="ai-chat__panel" id="aiChatPanel" aria-label="AI Contribution Assistant" hidden>
+    <header class="ai-chat__header">
+      <div class="ai-chat__identity">
+        <span class="ai-chat__avatar"><i class="bi bi-stars" aria-hidden="true"></i></span>
+        <div>
+          <h2 class="ai-chat__title">AI Contribution Assistant</h2>
+          <p class="ai-chat__status">
+            <span class="ai-chat__status-dot" aria-hidden="true"></span>
+            Knows ContribKit · {{ request.path }}
+          </p>
+        </div>
+      </div>
+      <button type="button" class="ai-chat__close" id="aiChatClose" aria-label="Close assistant">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </header>
+
+    <div class="ai-chat__body" id="aiChatBody">
+      <div class="ai-chat__messages" id="aiChatMessages" role="log" aria-live="polite" aria-busy="false"></div>
+
+      <div class="ai-chat__empty" id="aiChatEmpty">
+        <div class="ai-chat__empty-icon"><i class="bi bi-chat-heart" aria-hidden="true"></i></div>
+        <p class="ai-chat__empty-title">Need a hand with open source?</p>
+        <p class="ai-chat__empty-desc">Ask me about issues, Git workflows, templates, or how to start your first contribution.</p>
+      </div>
+
+      <div class="ai-chat__gate" id="aiChatGate" hidden>
+        <i class="bi bi-person-lock" aria-hidden="true"></i>
+        <p class="ai-chat__gate-text">Log in to chat with the assistant.</p>
+        <a class="btn btn-primary" href="{% url 'login' %}?next={{ request.path|urlencode }}">Log In</a>
+      </div>
+
+      <div class="ai-chat__suggestions" id="aiChatSuggestions">
+        <button type="button" class="ai-chat__chip" data-suggestion="Find beginner issues I can contribute to">
+          <i class="bi bi-search" aria-hidden="true"></i> Find beginner issues
+        </button>
+        {% if '/issues/' in request.path %}
+        <button type="button" class="ai-chat__chip" data-suggestion="How should I approach this issue?">
+          <i class="bi bi-lightbulb" aria-hidden="true"></i> How should I approach this issue?
+        </button>
+        {% endif %}
+        <button type="button" class="ai-chat__chip" data-suggestion="Explain how Git branching works">
+          <i class="bi bi-git" aria-hidden="true"></i> Explain Git branching
+        </button>
+      </div>
+    </div>
+
+    <form class="ai-chat__form" id="aiChatForm">
+      <label class="visually-hidden" for="aiChatInput">Message the AI assistant</label>
+      <textarea id="aiChatInput" rows="1" maxlength="2000"
+                placeholder="Ask about contributing…" aria-label="Message"></textarea>
+      <button type="submit" class="ai-chat__send" id="aiChatSend" aria-label="Send message">
+        <i class="bi bi-send-fill" aria-hidden="true"></i>
+      </button>
+    </form>
+    <p class="ai-chat__footnote">AI-generated — always verify before acting.</p>
+  </section>
+</div>
