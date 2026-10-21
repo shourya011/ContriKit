@@ -79,8 +79,8 @@ to **your own server only**, via `POST /ai/chat/`. The server then calls **Groq*
 — `AI_GROQ_API_KEY` lives in `.env` and never reaches the browser. Groq is the
 only LLM backend; OpenAI, Gemini, and Anthropic are not used.
 
-**With no Groq key the assistant cannot work, and it fails quietly:** `/ai/chat/`
-answers `503 {"code": "ai_unavailable"}` and the router short-circuits *before*
+**With no Groq key the assistant cannot work:** `/ai/chat/` answers
+`503 {"code": "ai_not_configured"}` and the router short-circuits *before*
 making any outbound call, so nothing is ever sent to Groq and the Groq dashboard
 shows no request. `manage.py check` / `runserver` print the `ai.W001` warning at
 startup so this is visible immediately.
@@ -91,6 +91,9 @@ startup so this is visible immediately.
 AI_PROVIDERS=groq
 AI_GROQ_API_KEY=gsk-...          # Groq (api.groq.com)
 AI_GROQ_MODEL=openai/gpt-oss-120b
+AI_GROQ_TIMEOUT=30               # seconds per HTTP hop
+AI_GROQ_MAX_TOKENS=2048          # includes hidden reasoning tokens
+AI_GROQ_REASONING_EFFORT=low     # low | medium | high (gpt-oss only)
 ```
 
 ### 2. Verify the credentials before debugging the UI
@@ -109,6 +112,8 @@ curl http://127.0.0.1:8000/ai/health/             # provider status; no secrets,
 | Chat replies "…rejected the API key" (`code: provider_auth_failed`) | A key **is** set but Groq answered 401/403 — the key is wrong, revoked, or pasted with extra characters. Keys start with `gsk_`. |
 | Chat replies "…rejected this request" (`code: provider_error`) and Groq logs show HTTP 404 | `AI_GROQ_MODEL` is a retired ID (e.g. `llama-3.3-70b-versatile`, shut down 2026-08-16). Set `AI_GROQ_MODEL=openai/gpt-oss-120b` and reload. |
 | Chat replies "…unreachable" (`code: ai_unavailable`) | Network/firewall issue reaching `api.groq.com`, or the circuit breaker is open after repeated failures. |
+| `/ai/health/` or `/ai/chat/` returns **404** on the deployed site | The PythonAnywhere web app is still running old code (or the wrong project directory). Pull the latest commit, verify `ai` is in `INSTALLED_APPS` and `path('ai/', include('ai.urls'))` is in `contribkit/urls.py`, then click **Reload**. |
+| Chat works but answers ignore the page you are on | The widget did not send `page`; it now posts `window.location.pathname` and the server validates it as a same-origin path. Hard-refresh to bust the cached `ai_chat.js`. |
 | "The AI provider is busy" | Groq rate limit (429); the router retries with backoff. |
 | Widget shows "I could not read your security token" | The page has no CSRF token — reload once. `base.html` publishes it as `<meta name="csrf-token">`. |
 | Nothing at all happens and DevTools shows no `/ai/chat/` request | A JavaScript error before the request; check DevTools → Console. |
@@ -175,6 +180,58 @@ If the key is **MISSING**, check, in this order:
 > network problem. It now reports the real cause:
 > `ai_not_configured`, `provider_auth_failed`, `provider_error`,
 > `ai_unavailable`, `ai_timeout`, or `provider_rate_limited`.
+
+---
+
+## Deploying the AI assistant to PythonAnywhere
+
+The code in this repository is ready, but an existing PythonAnywhere app keeps
+serving the last **Reload**ed code. A deployed site that returns 404 for
+`/ai/health/` is running a revision from before the `ai` app was added.
+
+1. **Update the code** in the PythonAnywhere Bash console:
+
+   ```bash
+   cd ~/contribkit
+   git pull
+   pip install --user -r requirements.txt
+   ```
+
+2. **Add the environment variables** in the web app's *Environment variables*
+   section (or in `~/contribkit/.env`): `SECRET_KEY`, `ALLOWED_HOSTS`,
+   `AI_GROQ_API_KEY`, and optionally `AI_GROQ_MODEL` /
+   `AI_GROQ_REASONING_EFFORT`. Keep `DJANGO_SETTINGS_MODULE` unset there —
+   the WSGI file sets it.
+
+3. **Point the WSGI file at the project.** Replace the contents of
+   `/var/www/<username>_pythonanywhere_com_wsgi.py` with
+   `contribkit_pa_wsgi.py` (or set `CONTRIKIT_PROJECT_DIR` if the clone is not
+   at `~/contribkit`). The file raises a clear error instead of silently
+   serving the placeholder app when the path is wrong.
+
+4. **Migrate and collect static files** (WhiteNoise now serves them, so no
+   separate static mapping is required):
+
+   ```bash
+   cd ~/contribkit
+   python manage.py migrate
+   python manage.py collectstatic --noinput
+   ```
+
+5. **Reload** the web app, then verify:
+
+   ```bash
+   curl https://<username>.pythonanywhere.com/ai/health/
+   python manage.py ai_test
+   ```
+
+   The health endpoint must return `status: ok` and `configured: true`. Groq's
+   API host (`api.groq.com`) is on PythonAnywhere's free outbound allowlist.
+
+Requests are capped at 55 seconds (including retries and tool rounds) so one
+chat turn stays inside PythonAnywhere's per-request budget. A slow or
+rate-limited provider produces a JSON error with a stable `code` instead of a
+hanging request; the browser aborts after 70 seconds.
 
 ---
 

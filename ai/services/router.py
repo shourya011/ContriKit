@@ -206,6 +206,13 @@ class LLMRouter:
                     delay = min(
                         self.retry_backoff * (2 ** attempt), MAX_BACKOFF_SECONDS
                     )
+                    if request.deadline is not None:
+                        remaining = request.deadline - time.monotonic()
+                        if remaining <= 1.0:
+                            # No time left for another hop; surface the last
+                            # error rather than sleeping past the WSGI budget.
+                            raise last_exc
+                        delay = min(delay, max(0.0, remaining - 1.0))
                     if delay:
                         time.sleep(delay)
                 continue

@@ -21,10 +21,12 @@ text answer. Tool execution never raises into the caller.
 
 import json
 import logging
+import re
+import time
 
 from django.conf import settings
 
-from .exceptions import AIServiceError, LLMConfigurationError
+from .exceptions import AIServiceError, LLMConfigurationError, LLMProviderError
 from .prompts import build_system_prompt
 from .providers import PROVIDER_REGISTRY, get_provider_class, get_provider_defaults
 from .router import LLMRouter
@@ -40,9 +42,37 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 # Module-level cache: the router is built once per process from settings.
+# The cache key makes the service rebuild when settings change (tests with
+# ``override_settings``, or a management command after a reload).
 _ai_service: "AIService | None" = None
+_ai_service_key = None
+
+# Settings that determine the provider/router wiring.
+CACHE_SETTINGS = (
+    "AI_PROVIDERS",
+    "AI_PROVIDER",
+    "AI_GROQ_API_KEY",
+    "AI_GROQ_BASE_URL",
+    "AI_GROQ_MODEL",
+    "AI_GROQ_TIMEOUT",
+    "AI_GROQ_MAX_TOKENS",
+    "AI_GROQ_TEMPERATURE",
+    "AI_GROQ_REASONING_EFFORT",
+    "AI_GROQ_PRIORITY",
+    "AI_GROQ_RATE_LIMIT",
+    "AI_PROVIDER_FALLBACK",
+    "AI_PROVIDER_RETRIES",
+    "AI_PROVIDER_RETRY_BACKOFF",
+    "AI_PROVIDER_CIRCUIT_BREAKER",
+    "AI_PROVIDER_CIRCUIT_FAILURE_THRESHOLD",
+    "AI_PROVIDER_CIRCUIT_RESET_SECONDS",
+)
 
 MAX_TOOL_ROUNDS = 4
+# One user turn (including retries + tool rounds) must finish well inside
+# PythonAnywhere's default 300s WSGI request budget.
+MAX_REQUEST_SECONDS = 55
+ISSUE_PATH_RE = re.compile(r"^/issues/(?P<issue_id>\d+)/")
 
 # Settings key used for Groq's API key. Other vendor names are not supported.
 PROVIDER_KEY_SETTINGS = {
@@ -86,17 +116,37 @@ class AIService:
         """
         self._validate_messages(messages)
         registry = tools if tools is not None else self.tools
+        issue_id = issue_id or _issue_id_from_path(page_path)
         context = ToolContext(user=user, page_path=page_path, issue_id=issue_id)
         working = list(messages)
         specs = registry.specs() if registry else ()
+        deadline = time.monotonic() + MAX_REQUEST_SECONDS
 
         rounds = max_tool_rounds if registry else 1
         for _ in range(rounds):
             request = self._build_request(
                 working, specs, model=model, temperature=temperature,
-                max_tokens=max_tokens, timeout=timeout,
+                max_tokens=max_tokens, timeout=timeout, deadline=deadline,
             )
-            response = self.router.chat(request)
+            try:
+                response = self.router.chat(request)
+            except LLMProviderError as exc:
+                if not specs or not _is_tool_protocol_error(exc):
+                    raise
+                # Groq models occasionally emit a malformed tool call
+                # (``tool_use_failed``/HTTP 400). The user still deserves an
+                # answer, so retry once without tools instead of failing.
+                logger.warning(
+                    "Provider rejected a tool call (%s); retrying without tools.",
+                    exc.code or exc.status_code,
+                )
+                specs = ()
+                request = self._build_request(
+                    _without_tool_protocol(working), (), model=model,
+                    temperature=temperature, max_tokens=max_tokens,
+                    timeout=timeout, deadline=deadline,
+                )
+                response = self.router.chat(request)
             if not response.tool_calls or not registry:
                 return response
 
@@ -126,10 +176,13 @@ class AIService:
                     )
                 )
 
-        # Safety net: force a final answer without more tool calls.
+        # Safety net: force a final answer without more tool calls. Tool
+        # protocol messages are stripped so the provider never sees a
+        # ``role="tool"`` turn without a matching ``tools`` schema.
         request = self._build_request(
-            working, (), model=model, temperature=temperature,
-            max_tokens=max_tokens, timeout=timeout,
+            _without_tool_protocol(working), (), model=model,
+            temperature=temperature, max_tokens=max_tokens,
+            timeout=timeout, deadline=deadline,
         )
         return self.router.chat(request)
 
@@ -154,7 +207,7 @@ class AIService:
             "service": "contribkit-ai",
             "active_provider": active if active else (configured[0] if configured else None),
             "providers": providers,
-            "configuration": env_health_payload(),
+            "configuration": env_health_payload(redact_paths=True),
             "tools": {
                 "enabled": tools_enabled,
                 "count": len(self.tools.names()) if tools_enabled else 0,
@@ -176,7 +229,8 @@ class AIService:
 
     @staticmethod
     def _build_request(
-        messages, specs, *, model=None, temperature=None, max_tokens=None, timeout=None
+        messages, specs, *, model=None, temperature=None, max_tokens=None,
+        timeout=None, deadline=None,
     ) -> ChatRequest:
         return ChatRequest(
             messages=tuple(messages),
@@ -184,6 +238,7 @@ class AIService:
             temperature=temperature,
             max_tokens=max_tokens,
             timeout=timeout,
+            deadline=deadline,
             tools=tuple(specs),
         )
 
@@ -219,11 +274,60 @@ def _provider_setting(name: str, suffix: str, default):
     return default if value in (None, "") else value
 
 
+def _is_tool_protocol_error(exc) -> bool:
+    """True when the provider rejected the *tool call format*, not the request.
+
+    Groq's gpt-oss models occasionally return a tool call that fails Groq's
+    own validator (HTTP 400, ``tool_use_failed``). That is recoverable: the
+    same conversation without tools normally produces a plain answer.
+    """
+    return getattr(exc, "code", None) in {
+        "tool_use_failed",
+        "tool_call_validation_failed",
+        "invalid_tool_call",
+    }
+
+
+def _without_tool_protocol(messages) -> list[ChatMessage]:
+    """Drop tool calls/results so a no-tools retry is a valid conversation.
+
+    Sending ``role="tool"`` messages to a request without ``tools`` (or an
+    assistant ``tool_calls`` field) is itself rejected by some providers, so
+    the fallback keeps only plain user/assistant/system turns.
+    """
+    cleaned = []
+    for message in messages:
+        if message.role == "tool":
+            continue
+        if message.role == "assistant" and message.tool_calls:
+            content = (message.content or "").strip()
+            if not content:
+                continue
+            cleaned.append(ChatMessage(role="assistant", content=content))
+            continue
+        cleaned.append(message)
+    return cleaned
+
+
+def _issue_id_from_path(page_path) -> int | None:
+    """Parse ``/issues/<id>/`` so tools know which issue the user is viewing."""
+    if not page_path:
+        return None
+    match = ISSUE_PATH_RE.match(str(page_path))
+    if not match:
+        return None
+    try:
+        return int(match.group("issue_id"))
+    except (TypeError, ValueError):
+        return None
+
+
 def _provider_config(name: str) -> ProviderConfig:
     """Build a ProviderConfig for one provider from settings/env."""
     defaults = get_provider_defaults(name)
     key_setting = PROVIDER_KEY_SETTINGS.get(name, "")
-    api_key = getattr(settings, key_setting, "") if key_setting else ""
+    api_key = (getattr(settings, key_setting, "") if key_setting else "") or ""
+    api_key = str(api_key).strip()
     rate_limit = _provider_setting(name, "RATE_LIMIT", 0)
     model = _provider_setting(name, "MODEL", defaults.get("model"))
     if name == "groq" and model in GROQ_RETIRED_MODELS:
@@ -234,14 +338,24 @@ def _provider_config(name: str) -> ProviderConfig:
             replacement,
         )
         model = replacement
+    timeout = _provider_setting(name, "TIMEOUT", 60)
+    # Keep each Groq hop inside PythonAnywhere's request budget.
+    try:
+        timeout = min(int(timeout), MAX_REQUEST_SECONDS)
+    except (TypeError, ValueError):
+        timeout = MAX_REQUEST_SECONDS
+    reasoning = _provider_setting(name, "REASONING_EFFORT", None)
+    if isinstance(reasoning, str):
+        reasoning = reasoning.strip().lower() or None
     return ProviderConfig(
         name=name,
         api_key=api_key,
         base_url=_provider_setting(name, "BASE_URL", defaults.get("base_url")),
         model=model,
-        timeout=_provider_setting(name, "TIMEOUT", 60),
-        max_tokens=_provider_setting(name, "MAX_TOKENS", 1024),
+        timeout=timeout,
+        max_tokens=_provider_setting(name, "MAX_TOKENS", 2048),
         temperature=_provider_setting(name, "TEMPERATURE", 0.7),
+        reasoning_effort=reasoning,
         priority=_provider_setting(name, "PRIORITY", PROVIDER_DEFAULT_PRIORITY.get(name, 100)),
         rate_limit_per_minute=int(rate_limit) if rate_limit else None,
     )
@@ -269,14 +383,27 @@ def build_default_router() -> LLMRouter:
     )
 
 
+def _service_cache_key():
+    return tuple(str(getattr(settings, name, "")) for name in CACHE_SETTINGS)
+
+
+def reset_ai_service() -> None:
+    """Drop the cached service so the next call re-reads configuration."""
+    global _ai_service, _ai_service_key
+    _ai_service = None
+    _ai_service_key = None
+
+
 def get_ai_service() -> AIService:
-    """Return the process-wide AI service (built once from settings)."""
-    global _ai_service
-    if _ai_service is None:
+    """Return the process-wide AI service (built once per configuration)."""
+    global _ai_service, _ai_service_key
+    key = _service_cache_key()
+    if _ai_service is None or _ai_service_key != key:
         _ai_service = AIService(
             router=build_default_router(),
             tools=build_default_tool_registry(),
         )
+        _ai_service_key = key
     return _ai_service
 
 

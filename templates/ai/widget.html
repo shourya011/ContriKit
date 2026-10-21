@@ -1,7 +1,7 @@
 {% load static %}
 {# AI Contribution Assistant — floating widget, included globally in base.html. #}
-{# Page/issue context is resolved server-side from request.path; the widget only #}
-{# sends the user's message. No provider keys ever reach this markup. #}
+{# The widget sends the browser's path with each message; the server validates #}
+{# it as a same-origin path. No provider keys ever reach this markup. #}
 <div class="ai-chat" id="aiChat"
      data-authenticated="{% if user.is_authenticated %}true{% else %}false{% endif %}"
      data-login-url="{% url 'login' %}?next={{ request.path|urlencode }}">

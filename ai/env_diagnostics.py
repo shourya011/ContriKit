@@ -197,18 +197,46 @@ def config_issues() -> list[str]:
     return issues
 
 
-def env_health_payload() -> dict:
-    """Small, secret-safe payload for /ai/health/ (and ai_env diagnostics)."""
+def env_health_payload(redact_paths: bool = False) -> dict:
+    """Small, secret-safe payload for /ai/health/ (and ai_env diagnostics).
+
+    ``redact_paths=True`` hides absolute server paths (the public health
+    endpoint must not disclose the deployment layout).
+    """
     from contribkit.settings._env import ENV_FILE, ENV_FILE_ERROR
 
     path = find_env_file()
+    duplicates = duplicate_keys()
+    conflicts = env_config_conflicts()
+    loaded = loaded_from_environment()
+    env_file_error = ENV_FILE_ERROR
+    if redact_paths:
+        # Public endpoint: no path, and no credential fragments (not even a
+        # masked prefix). Presence/first-line metadata is enough to diagnose.
+        for dup in duplicates:
+            dup.pop("last_value", None)
+        for conflict in conflicts:
+            conflict.pop("env_file_value", None)
+            conflict.pop("env_var_value", None)
+            conflict["message"] = (
+                f"{conflict['key']} is defined in the OS environment and "
+                "overrides the .env value."
+            )
+        loaded = {key: bool(value) for key, value in loaded.items()}
+        if env_file_error:
+            # Exception text may embed the absolute .env path.
+            env_file_error = env_file_error.replace(
+                str(ENV_FILE.parent), "<project>"
+            )
     return {
         "env_file_found": bool(path),
-        "env_file": path or None,
-        "expected_env_file": str(ENV_FILE),
-        "env_file_error": ENV_FILE_ERROR,
+        "env_file": None if redact_paths else (path or None),
+        "expected_env_file": (
+            ENV_FILE.name if redact_paths else str(ENV_FILE)
+        ),
+        "env_file_error": env_file_error,
         "encoding_notes": _encoding_notes(path) if path else [],
-        "duplicates": duplicate_keys(),
-        "conflicts": env_config_conflicts(),
-        "loaded_from_environment": loaded_from_environment(),
+        "duplicates": duplicates,
+        "conflicts": conflicts,
+        "loaded_from_environment": loaded,
     }
