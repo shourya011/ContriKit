@@ -72,6 +72,169 @@
 
 ---
 
+## AI Contribution Assistant (LLM setup)
+
+The floating assistant (`templates/ai/widget.html` + `static/js/ai_chat.js`) talks
+to **your own server only**, via `POST /ai/chat/`. The server then calls **Groq**
+— `AI_GROQ_API_KEY` lives in `.env` and never reaches the browser. Groq is the
+only LLM backend; OpenAI, Gemini, and Anthropic are not used.
+
+**With no Groq key the assistant cannot work:** `/ai/chat/` answers
+`503 {"code": "ai_not_configured"}` and the router short-circuits *before*
+making any outbound call, so nothing is ever sent to Groq and the Groq dashboard
+shows no request. `manage.py check` / `runserver` print the `ai.W001` warning at
+startup so this is visible immediately.
+
+### 1. Put your Groq key in `.env`
+
+```dotenv
+AI_PROVIDERS=groq
+AI_GROQ_API_KEY=gsk-...          # Groq (api.groq.com)
+AI_GROQ_MODEL=openai/gpt-oss-120b
+AI_GROQ_TIMEOUT=30               # seconds per HTTP hop
+AI_GROQ_MAX_TOKENS=2048          # includes hidden reasoning tokens
+AI_GROQ_REASONING_EFFORT=low     # low | medium | high (gpt-oss only)
+```
+
+### 2. Verify the credentials before debugging the UI
+
+```bash
+python manage.py ai_test                          # one real Groq call, no DB/UI needed
+python manage.py ai_test "Explain git rebase" --model openai/gpt-oss-120b
+curl http://127.0.0.1:8000/ai/health/             # provider status; no secrets, no API call
+```
+
+### Troubleshooting
+
+| Symptom | Cause |
+| --- | --- |
+| `ai.W001` warning at startup; chat replies "The AI assistant is not configured yet." (`code: ai_not_configured`) | No `AI_GROQ_API_KEY` in `.env` — see step 1. No Groq request is made in this state. |
+| Chat replies "…rejected the API key" (`code: provider_auth_failed`) | A key **is** set but Groq answered 401/403 — the key is wrong, revoked, or pasted with extra characters. Keys start with `gsk_`. |
+| Chat replies "…rejected this request" (`code: provider_error`) and Groq logs show HTTP 404 | `AI_GROQ_MODEL` is a retired ID (e.g. `llama-3.3-70b-versatile`, shut down 2026-08-16). Set `AI_GROQ_MODEL=openai/gpt-oss-120b` and reload. |
+| Chat replies "…unreachable" (`code: ai_unavailable`) | Network/firewall issue reaching `api.groq.com`, or the circuit breaker is open after repeated failures. |
+| `/ai/health/` or `/ai/chat/` returns **404** on the deployed site | The PythonAnywhere web app is still running old code (or the wrong project directory). Pull the latest commit, verify `ai` is in `INSTALLED_APPS` and `path('ai/', include('ai.urls'))` is in `contribkit/urls.py`, then click **Reload**. |
+| Chat works but answers ignore the page you are on | The widget did not send `page`; it now posts `window.location.pathname` and the server validates it as a same-origin path. Hard-refresh to bust the cached `ai_chat.js`. |
+| "The AI provider is busy" | Groq rate limit (429); the router retries with backoff. |
+| Widget shows "I could not read your security token" | The page has no CSRF token — reload once. `base.html` publishes it as `<meta name="csrf-token">`. |
+| Nothing at all happens and DevTools shows no `/ai/chat/` request | A JavaScript error before the request; check DevTools → Console. |
+
+#### Still says "not configured" after adding the key to `.env`?
+
+Run the full diagnostic first — it prints the exact `.env` path Django reads,
+whether it exists, any encoding/BOM or duplicate-key problems, what the OS
+environment holds, and what Django actually loaded (values are masked):
+
+```bash
+python manage.py ai_env            # full report
+python manage.py ai_env --verbose  # also list every key found in .env
+```
+
+Then verify the key end to end (one real Groq call, no UI/DB):
+
+```bash
+python manage.py ai_test
+```
+
+If the key is **MISSING**, check, in this order:
+
+1. **A leftover environment variable shadows `.env` (most common cause on
+   Windows).** python-decouple checks the OS environment **before** `.env`,
+   so an `AI_GROQ_API_KEY` variable still set in your terminal — even an
+   **empty** one — silently wins. Check it:
+
+   ```powershell
+   $env:AI_GROQ_API_KEY        # if this prints anything (even nothing that
+                               # shows as empty), it is overriding .env
+   ```
+   * `Remove-Item Env:AI_GROQ_API_KEY` (PowerShell) or `unset AI_GROQ_API_KEY`
+     (bash), or better: **open a brand-new terminal** — old PowerShell/cmd
+     sessions keep stale variables (a common cause: `setx`, editing env vars
+     earlier, or running Django from a shell where the variable was set).
+2. **Exact variable name.** It must be `AI_GROQ_API_KEY=gsk_...` — not
+   `GROQ_API_KEY`, `GROQ_KEY`, or `OPENAI_API_KEY`.
+3. **The file the server actually reads.** ContribKit pins `.env` to the
+   **project root** (the folder containing `manage.py`, resolved via
+   `contribkit/settings/_env.py` — no guessing from the caller path anymore).
+   The file must not be commented out with `#`; an empty value
+   (`AI_GROQ_API_KEY=`) counts as "not configured". `ai_env` prints the exact
+   path Django uses.
+4. **No stray `.env` / `settings.ini` anywhere up the tree.** Older code used
+   python-decouple's auto-detection, which searches **upward from the
+   settings package** — so a stray `contribkit/settings/.env` (even an empty
+   one) or `settings.ini` won and your project-root `.env` was ignored.
+   `ai_env` tells you if the wrong file is close by.
+5. **One definition per key.** If `AI_GROQ_API_KEY` appears twice in `.env`,
+   python-decouple uses the **last** line. `ai_env` flags duplicates.
+6. **Plain UTF-8, no BOM, no re-save weirdness.** A UTF-8 BOM on line 1 makes
+   the first key invisible to decouple; a UTF-16 file is unreadable. `ai_env`
+   detects both.
+7. **Restart the server.** Django reads `.env` at startup and the AI service is
+   cached per process. After editing `.env`, restart `runserver` (or click
+   **Reload** on PythonAnywhere) — a running process keeps the old settings.
+8. **The key is valid.** `gsk_...` keys are what Groq issues at
+   [console.groq.com](https://console.groq.com). A 401/403 from
+   `python manage.py ai_test` means the key is wrong/revoked.
+
+> Note: the chat endpoint previously answered 503 `ai_unavailable` with
+> "not configured yet" for **every** failure — including a bad key or a
+> network problem. It now reports the real cause:
+> `ai_not_configured`, `provider_auth_failed`, `provider_error`,
+> `ai_unavailable`, `ai_timeout`, or `provider_rate_limited`.
+
+---
+
+## Deploying the AI assistant to PythonAnywhere
+
+The code in this repository is ready, but an existing PythonAnywhere app keeps
+serving the last **Reload**ed code. A deployed site that returns 404 for
+`/ai/health/` is running a revision from before the `ai` app was added.
+
+1. **Update the code** in the PythonAnywhere Bash console:
+
+   ```bash
+   cd ~/contribkit
+   git pull
+   pip install --user -r requirements.txt
+   ```
+
+2. **Add the environment variables** in the web app's *Environment variables*
+   section (or in `~/contribkit/.env`): `SECRET_KEY`, `ALLOWED_HOSTS`,
+   `AI_GROQ_API_KEY`, and optionally `AI_GROQ_MODEL` /
+   `AI_GROQ_REASONING_EFFORT`. Keep `DJANGO_SETTINGS_MODULE` unset there —
+   the WSGI file sets it.
+
+3. **Point the WSGI file at the project.** Replace the contents of
+   `/var/www/<username>_pythonanywhere_com_wsgi.py` with
+   `contribkit_pa_wsgi.py` (or set `CONTRIKIT_PROJECT_DIR` if the clone is not
+   at `~/contribkit`). The file raises a clear error instead of silently
+   serving the placeholder app when the path is wrong.
+
+4. **Migrate and collect static files** (WhiteNoise now serves them, so no
+   separate static mapping is required):
+
+   ```bash
+   cd ~/contribkit
+   python manage.py migrate
+   python manage.py collectstatic --noinput
+   ```
+
+5. **Reload** the web app, then verify:
+
+   ```bash
+   curl https://<username>.pythonanywhere.com/ai/health/
+   python manage.py ai_test
+   ```
+
+   The health endpoint must return `status: ok` and `configured: true`. Groq's
+   API host (`api.groq.com`) is on PythonAnywhere's free outbound allowlist.
+
+Requests are capped at 55 seconds (including retries and tool rounds) so one
+chat turn stays inside PythonAnywhere's per-request budget. A slow or
+rate-limited provider produces a JSON error with a stable `code` instead of a
+hanging request; the browser aborts after 70 seconds.
+
+---
+
 ## Sign in with Google (OAuth 2.0)
 
 Handled by [python-social-auth](https://python-social-auth.readthedocs.io/) (`social-auth-app-django`), which exposes `/login/google-oauth2/` (start) and `/complete/google-oauth2/` (callback).

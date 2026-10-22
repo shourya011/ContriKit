@@ -70,7 +70,14 @@ function initSaveToggle() {
     btn.addEventListener('click', async (e) => {
       e.preventDefault();
       const issueId = btn.getAttribute('data-issue-id');
-      const csrfToken = getCookie('csrftoken');
+      const csrfToken = getCsrfToken();
+
+      if (!csrfToken) {
+        // Never send a tokenless POST: Django answers 403 "CSRF cookie not
+        // set", which used to be misread as a logged-out session.
+        showToast('Please refresh the page, then try again.', 'danger');
+        return;
+      }
 
       try {
         btn.disabled = true;
@@ -82,11 +89,19 @@ function initSaveToggle() {
             'X-Requested-With': 'XMLHttpRequest',
           },
         });
-        const data = await response.json();
+        let data = {};
+        try { data = await response.json(); } catch { /* non-JSON body */ }
         btn.disabled = false;
 
-        if (response.status === 403 || data.error === 'login_required') {
+        // Only a real "login_required" answer means the session is gone —
+        // any other 403/4xx is an error worth showing, not a redirect.
+        if (data.error === 'login_required') {
           window.location.href = `/accounts/login/?next=${window.location.pathname}`;
+          return;
+        }
+
+        if (!response.ok) {
+          showToast(data.error || 'Could not update the saved issue. Please try again.', 'danger');
           return;
         }
 
@@ -156,7 +171,17 @@ function showToast(message, type = 'primary') {
   el.addEventListener('hidden.bs.toast', () => el.remove());
 }
 
-/* ── CSRF cookie helper ── */
+/* ── CSRF helpers ──
+   Every AJAX call here is same-origin and must send the CSRF token. It is
+   published as <meta name="csrf-token"> by base.html, which works even when
+   document.cookie cannot be read; the cookie is kept as a fallback for pages
+   served from an older cache. */
+function getCsrfToken() {
+  const meta = document.querySelector('meta[name="csrf-token"]');
+  const fromMeta = meta && meta.getAttribute('content');
+  return fromMeta || getCookie('csrftoken');
+}
+
 function getCookie(name) {
   if (!document.cookie) return null;
   for (const cookie of document.cookie.split(';')) {

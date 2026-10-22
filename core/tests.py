@@ -1,17 +1,24 @@
-"""Tests for core middleware, including the CSP header that governs the
-Google OAuth login redirect.
+"""Tests for core middleware and the CSRF plumbing every AJAX feature needs.
+
+Includes the CSP header that governs the Google OAuth login redirect, and the
+CSRF token issuance that ``static/js`` depends on.
 
 These run through the real middleware stack and the real
 ``social_django.views.auth`` / ``social_django.views.complete`` views; only the
 two outbound HTTPS calls to Google are mocked.
 """
 
+import json
+import re
 from unittest import mock
 from urllib.parse import parse_qs, urlparse
 
 from django.conf import settings
 from django.test import Client, TestCase
 from django.urls import reverse
+
+from issues.models import Issue
+from repos.models import Repo
 
 
 FAKE_CLIENT_ID = '1234567890-abcdefghijklmnop.apps.googleusercontent.com'
@@ -188,3 +195,140 @@ class GoogleOAuthFlowTests(TestCase):
             self.client.logout()
 
         self.assertEqual(User.objects.filter(email='ada@example.com').count(), 1)
+
+
+class CsrfAjaxTests(TestCase):
+    """The CSRF token plumbing that every same-origin ``fetch()`` depends on.
+
+    The JavaScript used to read the token from the ``csrftoken`` cookie only.
+    Whenever that cookie cannot be read — HttpOnly hardening, a cookie
+    blocker, cleared storage — the chat widget redirected to the login page
+    *before* sending anything, so no request ever reached ``/ai/chat/``, and
+    the bookmark button posted ``X-CSRFToken: null`` and read the resulting
+    403 as a logged-out session. Every unit test stayed green through all of
+    it, because they run without CSRF enforcement.
+
+    ``base.html`` now publishes the token as ``<meta name="csrf-token">``.
+    These tests pin both halves: a real token is present on every page that
+    hosts AJAX, and the real ``CsrfViewMiddleware`` accepts it.
+    """
+
+    PAGES_WITH_AJAX = ['/', '/issues/', '/templates/', '/cheatsheet/']
+
+    @classmethod
+    def setUpTestData(cls):
+        from accounts.models import User
+
+        cls.user = User.objects.create_user(username='csrf_viewer', password='pw')
+        cls.editor = User.objects.create_user(username='csrf_editor', password='pw')
+        cls.repo = Repo.objects.create(
+            editor=cls.editor,
+            github_url='https://github.com/django/django',
+            name='django/django',
+            language='Python',
+        )
+        cls.issue = Issue.objects.create(
+            repo=cls.repo,
+            posted_by=cls.editor,
+            title='Fix a typo in the docs',
+            description='A beginner friendly typo fix.',
+            github_issue_url='https://github.com/django/django/issues/1',
+            difficulty='beginner',
+            estimated_hours=1.0,
+            status='open',
+        )
+
+    # ── Helpers ──────────────────────────────────────────────────────
+    def fresh_client(self, csrf_checks=False):
+        """A logged-in client that has never been issued a CSRF cookie.
+
+        Only the ``csrftoken`` cookie is dropped — clearing the whole jar
+        would also drop ``sessionid`` and make the request anonymous.
+        """
+        client = Client(enforce_csrf_checks=csrf_checks)
+        client.force_login(self.user)
+        client.cookies.pop('csrftoken', None)
+        return client
+
+    def token_from(self, client, path):
+        """The CSRF token a page publishes to JavaScript, as the browser reads it."""
+        response = client.get(path)
+        self.assertEqual(response.status_code, 200, path)
+        match = re.search(
+            r'<meta name="csrf-token" content="([^"]+)"', response.content.decode()
+        )
+        self.assertIsNotNone(match, f'{path} published no csrf-token meta tag')
+        return match.group(1)
+
+    # ── Token issuance ───────────────────────────────────────────────
+    def test_every_page_issues_the_csrf_cookie(self):
+        for path in self.PAGES_WITH_AJAX:
+            with self.subTest(path=path):
+                client = self.fresh_client()
+                client.get(path)
+                self.assertIn(
+                    'csrftoken', client.cookies,
+                    f'{path} did not set the csrftoken cookie',
+                )
+
+    def test_every_page_publishes_a_non_empty_token_to_javascript(self):
+        for path in self.PAGES_WITH_AJAX:
+            with self.subTest(path=path):
+                self.assertTrue(self.token_from(self.fresh_client(), path))
+
+    def test_published_token_pairs_with_the_csrf_cookie(self):
+        """The meta token must be the one the CSRF middleware will accept."""
+        client = self.fresh_client(csrf_checks=True)
+        token = self.token_from(client, '/')
+
+        accepted = client.post(
+            f'/issues/{self.issue.id}/toggle-save/',
+            content_type='application/json',
+            HTTP_X_CSRFTOKEN=token,
+        )
+        self.assertEqual(accepted.status_code, 200)
+
+        # A made-up token is rejected, which proves enforcement is really on
+        # and the assertion above is not passing by accident.
+        rejected = client.post(
+            f'/issues/{self.issue.id}/toggle-save/',
+            content_type='application/json',
+            HTTP_X_CSRFTOKEN='x' * 64,
+        )
+        self.assertEqual(rejected.status_code, 403)
+
+    # ── The two AJAX features, through the real CSRF middleware ──────
+    def test_issue_bookmark_round_trip_with_the_page_token(self):
+        client = self.fresh_client(csrf_checks=True)
+        token = self.token_from(client, '/issues/')
+
+        response = client.post(
+            f'/issues/{self.issue.id}/toggle-save/',
+            content_type='application/json',
+            HTTP_X_CSRFTOKEN=token,
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)['status'], 'saved')
+
+        response = client.post(
+            f'/issues/{self.issue.id}/toggle-save/',
+            content_type='application/json',
+            HTTP_X_CSRFTOKEN=token,
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(json.loads(response.content)['status'], 'unsaved')
+
+    def test_missing_token_is_rejected_not_silently_ignored(self):
+        """Guards the assumption the JavaScript fallbacks rely on."""
+        client = self.fresh_client(csrf_checks=True)
+        client.get('/issues/')
+        response = client.post(
+            f'/issues/{self.issue.id}/toggle-save/',
+            content_type='application/json',
+            HTTP_X_CSRFTOKEN='null',
+            HTTP_X_REQUESTED_WITH='XMLHttpRequest',
+        )
+        self.assertEqual(response.status_code, 403)
+        self.assertNotIn(b'login_required', response.content)

@@ -27,4 +27,5 @@ urlpatterns = [
     path('cheatsheet/', include('cheatsheet.urls')),
     path('editor/', include('repos.editor_urls')),
     path('admin-panel/', include('core.admin_panel_urls')),
+    path('ai/', include('ai.urls')),
 ]

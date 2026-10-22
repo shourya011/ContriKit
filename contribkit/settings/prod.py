@@ -1,11 +1,18 @@
 from .base import *
-from decouple import config, Csv
+from decouple import Csv
 
 # SECRET_KEY: MUST be set in environment. No default fallback for production.
 SECRET_KEY = config('SECRET_KEY')
 
 DEBUG = config('DEBUG', default=False, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='.pythonanywhere.com,localhost,127.0.0.1', cast=Csv())
+
+# Serve STATIC_ROOT directly from the app. PythonAnywhere can also map /static/
+# manually, but WhiteNoise keeps the deployment portable and avoids 404s when
+# that mapping is missing. It is intentionally not enabled in dev so
+# `runserver` always serves the live files from `static/`.
+MIDDLEWARE = list(MIDDLEWARE)
+MIDDLEWARE.insert(1, 'whitenoise.middleware.WhiteNoiseMiddleware')
 
 # Database
 DB_ENGINE = config('DB_ENGINE', default='sqlite3')
@@ -37,7 +44,9 @@ STORAGES = {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
-        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        # Compress (not manifest) so templates never break on a missing
+        # hashed asset; WhiteNoise serves the compressed files.
+        "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 

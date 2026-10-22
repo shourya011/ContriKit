@@ -18,6 +18,7 @@ def run_tests():
         ('/issues/', 'Issues Board'),
         ('/templates/', 'Template Library Grid'),
         ('/cheatsheet/', 'Git Cheat Sheet'),
+        ('/ai/health/', 'AI Service Health'),
         ('/accounts/login/', 'Login Page'),
         ('/accounts/signup/', 'Signup Page'),
     ]
