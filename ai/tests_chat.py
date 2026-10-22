@@ -88,7 +88,9 @@ class ChatEndpointTestCase(TestCase):
     @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
     def test_success_returns_reply(self, mock_chat):
         self.client.force_login(self.user)
-        response = self.post_json({"message": "Find me issues"})
+        response = self.post_json(
+            {"message": "Find me issues", "page": "/issues/12/"}
+        )
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.content)
         self.assertEqual(data["reply"], "Hello from the assistant!")
@@ -97,9 +99,55 @@ class ChatEndpointTestCase(TestCase):
 
         kwargs = mock_chat.call_args.kwargs
         self.assertEqual(kwargs["user"].username, "chatter")
-        self.assertEqual(kwargs["page_path"], "/ai/chat/")
+        self.assertEqual(kwargs["page_path"], "/issues/12/")
         self.assertEqual(kwargs["history"], [])
         self.assertIsInstance(kwargs["tool_events"], list)
+
+    @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
+    def test_unsafe_page_is_ignored(self, mock_chat):
+        self.client.force_login(self.user)
+        for bad in ("https://evil.example/phish", "//evil.example/x", "/x\r\nSet-Cookie: y", 42):
+            response = self.post_json({"message": "hi", "page": bad})
+            self.assertEqual(response.status_code, 200)
+        for call in mock_chat.call_args_list:
+            self.assertEqual(call.kwargs["page_path"], "/")
+
+    @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
+    def test_same_origin_referer_used_when_page_missing(self, mock_chat):
+        self.client.force_login(self.user)
+        response = self.client.post(
+            "/ai/chat/",
+            data=json.dumps({"message": "hi"}),
+            content_type="application/json",
+            HTTP_REFERER="http://testserver/templates/pr-template/",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(mock_chat.call_args.kwargs["page_path"], "/templates/pr-template/")
+
+    @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
+    def test_cross_origin_referer_is_ignored(self, mock_chat):
+        self.client.force_login(self.user)
+        self.client.post(
+            "/ai/chat/",
+            data=json.dumps({"message": "hi"}),
+            content_type="application/json",
+            HTTP_REFERER="https://evil.example/issues/1/",
+        )
+        self.assertEqual(mock_chat.call_args.kwargs["page_path"], "/")
+
+    @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
+    def test_non_string_message_rejected(self, mock_chat):
+        self.client.force_login(self.user)
+        response = self.post_json({"message": ["hi"]})
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(json.loads(response.content)["code"], "invalid_message")
+
+    @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
+    def test_chat_responses_are_not_cached(self, mock_chat):
+        self.client.force_login(self.user)
+        response = self.post_json({"message": "hi"})
+        self.assertEqual(response["Cache-Control"], "no-store")
+        self.assertEqual(response["X-Content-Type-Options"], "nosniff")
 
     @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
     def test_history_is_kept_between_turns(self, mock_chat):
@@ -260,6 +308,7 @@ class ChatEndpointTestCase(TestCase):
         response = self.post_json({"message": "hi"})
         self.assertEqual(response.status_code, 500)
         self.assertEqual(json.loads(response.content)["code"], "ai_error")
+        self.assertEqual(response["Cache-Control"], "no-store")
 
     @mock.patch("ai.views.ai_assistant_chat", side_effect=fake_reply)
     def test_failure_does_not_store_history(self, mock_chat):
@@ -273,6 +322,13 @@ class ChatEndpointTestCase(TestCase):
         # Only the successful turn's pair should exist.
         self.assertEqual(len(mock_chat.call_args_list), 2)
         self.assertEqual(len(mock_chat.call_args_list[1].kwargs["history"]), 0)
+
+
+class HealthCacheTests(TestCase):
+    def test_health_is_not_cached(self):
+        response = self.client.get("/ai/health/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response["Cache-Control"], "no-store")
 
 
 class ChatCsrfTests(TestCase):

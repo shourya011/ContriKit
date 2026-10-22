@@ -6,9 +6,11 @@ SimpleTestCase (no database access).
 """
 
 import json
+import time
 from unittest import mock
 
 import requests
+from django.conf import settings
 from django.test import RequestFactory, SimpleTestCase, override_settings
 
 from ai.checks import ai_provider_credentials
@@ -180,7 +182,8 @@ class GroqProviderTests(SimpleTestCase):
         payload = mock_post.call_args.kwargs["json"]
         self.assertEqual(payload["model"], "override-model")
         self.assertEqual(payload["temperature"], 0.9)
-        self.assertEqual(payload["max_tokens"], 999)
+        self.assertEqual(payload["max_completion_tokens"], 999)
+        self.assertNotIn("max_tokens", payload)
 
     @mock.patch("ai.services.providers.groq.requests.post")
     def test_timeout_raises_typed_error(self, mock_post):
@@ -340,11 +343,87 @@ class GroqProviderTests(SimpleTestCase):
         with self.assertRaises(LLMInvalidResponseError):
             self.provider.chat(self.request)
 
+    @mock.patch("ai.services.providers.groq.requests.post")
+    def test_gpt_oss_sends_reasoning_controls(self, mock_post):
+        provider = GroqProvider(
+            ProviderConfig(
+                name="groq",
+                api_key="gsk-test",
+                model="openai/gpt-oss-120b",
+                reasoning_effort="low",
+                max_tokens=2048,
+            )
+        )
+        mock_post.return_value = fake_groq_response(
+            {"model": "openai/gpt-oss-120b", "choices": [{"message": {"content": "ok"}}]}
+        )
+        provider.chat(self.request)
+        payload = mock_post.call_args.kwargs["json"]
+        self.assertEqual(payload["max_completion_tokens"], 2048)
+        self.assertEqual(payload["reasoning_effort"], "low")
+        self.assertIs(payload["include_reasoning"], False)
+
+    @mock.patch("ai.services.providers.groq.requests.post")
+    def test_non_reasoning_model_omits_reasoning_controls(self, mock_post):
+        mock_post.return_value = fake_groq_response(
+            {"model": "llama-3.3-70b-versatile", "choices": [{"message": {"content": "ok"}}]}
+        )
+        self.provider.chat(self.request)
+        payload = mock_post.call_args.kwargs["json"]
+        self.assertNotIn("reasoning_effort", payload)
+        self.assertNotIn("include_reasoning", payload)
+
+    @mock.patch("ai.services.providers.groq.requests.post")
+    def test_reasoning_exhausted_budget_reports_actionable_error(self, mock_post):
+        mock_post.return_value = fake_groq_response(
+            {
+                "model": "openai/gpt-oss-120b",
+                "choices": [
+                    {"message": {"content": None}, "finish_reason": "length"}
+                ],
+            }
+        )
+        with self.assertRaises(LLMInvalidResponseError) as ctx:
+            self.provider.chat(self.request)
+        self.assertIn("AI_GROQ_MAX_TOKENS", str(ctx.exception))
+
     def test_unconfigured_provider_raises(self):
         unconfigured = GroqProvider(ProviderConfig(name="groq", api_key=""))
         self.assertFalse(unconfigured.is_configured())
         with self.assertRaises(LLMConfigurationError):
             unconfigured.chat(self.request)
+
+
+class ToolProtocolFallbackTests(SimpleTestCase):
+    def test_tool_protocol_error_retries_without_tool_messages(self):
+        registry = make_registry()
+
+        class FlakyProvider(LLMProvider):
+            name = "flaky"
+
+            def __init__(self):
+                super().__init__(ProviderConfig(name=self.name, model="m"))
+                self.requests = []
+
+            def is_configured(self):
+                return True
+
+            def chat(self, request):
+                self.requests.append(request)
+                if len(self.requests) == 1:
+                    raise LLMProviderError(
+                        "bad tool call", status_code=400, code="tool_use_failed"
+                    )
+                return ChatResponse(content="plain answer", provider="flaky", model="m")
+
+        provider = FlakyProvider()
+        service = AIService(LLMRouter([provider]), tools=registry)
+        response = service.chat([ChatMessage(role="user", content="hi")])
+
+        self.assertEqual(response.content, "plain answer")
+        self.assertEqual(len(provider.requests), 2)
+        self.assertEqual(provider.requests[1].tools, ())
+        self.assertTrue(all(m.role != "tool" for m in provider.requests[1].messages))
 
 
 class AIServiceTests(SimpleTestCase):
@@ -491,6 +570,9 @@ class ToolLoopTests(SimpleTestCase):
         # 2 tool rounds + 1 forced final call (no tools)
         self.assertEqual(len(provider.requests), 3)
         self.assertEqual(provider.requests[-1].tools, ())
+        self.assertTrue(
+            all(m.role != "tool" for m in provider.requests[-1].messages)
+        )
         self.assertEqual(response.content, "")
 
     def test_no_tools_single_call(self):
@@ -535,6 +617,35 @@ class SettingsWiringTests(SimpleTestCase):
         self.assertEqual(service.router.providers[0].config.model, "openai/gpt-oss-120b")
 
 
+class RouterDeadlineTests(SimpleTestCase):
+    def test_retry_does_not_sleep_past_deadline(self):
+        class AlwaysSlow(LLMProvider):
+            name = "slow"
+
+            def __init__(self):
+                super().__init__(ProviderConfig(name=self.name, model="m"))
+                self.calls = 0
+
+            def is_configured(self):
+                return True
+
+            def chat(self, request):
+                self.calls += 1
+                raise LLMTimeoutError("timed out", provider=self.name)
+
+        provider = AlwaysSlow()
+        router = LLMRouter([provider], retries=3, retry_backoff=1.0, fallback=False)
+        request = ChatRequest(
+            messages=(ChatMessage(role="user", content="hi"),),
+            deadline=time.monotonic() - 1,
+        )
+        with mock.patch("ai.services.router.time.sleep") as sleep:
+            with self.assertRaises(LLMTimeoutError):
+                router.chat(request)
+        self.assertEqual(provider.calls, 1)
+        sleep.assert_not_called()
+
+
 class HealthViewTests(SimpleTestCase):
     def test_health_view_returns_json(self):
         service = AIService(LLMRouter([FakeProvider(configured=True)]))
@@ -561,6 +672,10 @@ class HealthViewTests(SimpleTestCase):
             response = ai_health_view(request)
         data = json.loads(response.content)
         self.assertNotIn("super-secret-key", str(data))
+        self.assertNotIn(str(settings.BASE_DIR), str(data))
+        health = data["configuration"]
+        self.assertIsNone(health["env_file"])
+        self.assertEqual(health["expected_env_file"], ".env")
 
 
 class ProviderCredentialCheckTests(SimpleTestCase):

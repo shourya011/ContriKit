@@ -102,6 +102,10 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# WhiteNoise: compress static assets at collectstatic time and cache them.
+WHITENOISE_MAX_AGE = 60 * 60 * 24 * 30
+WHITENOISE_USE_FINDERS = False
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -225,9 +229,13 @@ AI_PROVIDER_CIRCUIT_RESET_SECONDS = config('AI_PROVIDER_CIRCUIT_RESET_SECONDS', 
 AI_GROQ_API_KEY = config('AI_GROQ_API_KEY', default='')
 AI_GROQ_BASE_URL = config('AI_GROQ_BASE_URL', default='https://api.groq.com/openai/v1')
 AI_GROQ_MODEL = config('AI_GROQ_MODEL', default='openai/gpt-oss-120b')
-AI_GROQ_TIMEOUT = config('AI_GROQ_TIMEOUT', default=60, cast=int)
-AI_GROQ_MAX_TOKENS = config('AI_GROQ_MAX_TOKENS', default=1024, cast=int)
+AI_GROQ_TIMEOUT = config('AI_GROQ_TIMEOUT', default=30, cast=int)
+# gpt-oss is a reasoning model: reasoning tokens are part of the completion
+# budget, so a 1024-token cap could be exhausted before any visible answer.
+AI_GROQ_MAX_TOKENS = config('AI_GROQ_MAX_TOKENS', default=2048, cast=int)
 AI_GROQ_TEMPERATURE = config('AI_GROQ_TEMPERATURE', default=0.7, cast=float)
+# "low" | "medium" | "high" (gpt-oss only); empty = provider default.
+AI_GROQ_REASONING_EFFORT = config('AI_GROQ_REASONING_EFFORT', default='low')
 AI_GROQ_PRIORITY = config('AI_GROQ_PRIORITY', default=10, cast=int)
 AI_GROQ_RATE_LIMIT = config('AI_GROQ_RATE_LIMIT', default=0, cast=int)
 

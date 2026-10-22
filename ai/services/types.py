@@ -9,8 +9,10 @@ from typing import Any, Optional
 VALID_ROLES = ("system", "user", "assistant", "tool")
 
 GROQ_DEFAULT_BASE_URL = "https://api.groq.com/openai/v1"
-# Groq retired llama-3.3-70b-versatile on 2026-08-16; gpt-oss-120b is the
-# documented replacement (tool calling still supported).
+# Groq's current general-availability model with tool-calling support.
+# llama-3.3-70b-versatile / llama-3.1-8b-instant are now Enterprise-only on
+# Groq (they answer 404 on developer/free plans), so older .env files that
+# still name them are remapped to the gpt-oss equivalents.
 GROQ_DEFAULT_MODEL = "openai/gpt-oss-120b"
 GROQ_RETIRED_MODELS = {
     "llama-3.3-70b-versatile": "openai/gpt-oss-120b",
@@ -75,8 +77,15 @@ class ChatRequest:
     messages: tuple[ChatMessage, ...]
     model: Optional[str] = None
     temperature: Optional[float] = None
+    # Maximum number of *completion* tokens (serialized for Groq as
+    # ``max_completion_tokens``; reasoning tokens count toward it).
     max_tokens: Optional[int] = None
     timeout: Optional[int] = None
+    # Absolute ``time.monotonic()`` deadline shared by every retry and tool
+    # round of one user request. Providers clamp their socket timeout to the
+    # remaining budget and the router refuses to retry past it. This keeps a
+    # chat turn inside PythonAnywhere's per-request time limit.
+    deadline: Optional[float] = None
     # Provider-facing tool definitions (empty => no tool calling).
     tools: tuple[ToolSpec, ...] = ()
     # Reserved for later: provider hints, metadata, request ids for usage tracking.
@@ -106,8 +115,13 @@ class ProviderConfig:
     base_url: str = GROQ_DEFAULT_BASE_URL
     model: str = GROQ_DEFAULT_MODEL
     timeout: int = 60
-    max_tokens: int = 1024
+    # gpt-oss is a reasoning model: reasoning tokens count toward the
+    # completion budget, so 1024 can be exhausted before any visible answer
+    # or tool call is produced.
+    max_tokens: int = 2048
     temperature: float = 0.7
+    # "low" | "medium" | "high"; only sent for models that support it.
+    reasoning_effort: Optional[str] = None
     enabled: bool = True
     priority: int = 100
     rate_limit_per_minute: Optional[int] = None

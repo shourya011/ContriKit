@@ -17,10 +17,13 @@ class LLMConfigurationError(AIServiceError):
 class LLMProviderError(AIServiceError):
     """The provider returned an HTTP error response (request failed)."""
 
-    def __init__(self, message, status_code=None, provider=None):
+    def __init__(self, message, status_code=None, provider=None, code=None):
         super().__init__(message)
         self.status_code = status_code
         self.provider = provider
+        # Provider-specific machine-readable reason (e.g. Groq's
+        # ``tool_use_failed`` or ``model_not_found``), when available.
+        self.code = code
 
 
 class LLMProviderServerError(LLMProviderError):

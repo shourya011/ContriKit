@@ -25,7 +25,14 @@ function initAiChat() {
 
   const authenticated = root.dataset.authenticated === 'true';
   const loginUrl = root.dataset.loginUrl || '/accounts/login/';
+  /* Server-side page context: the chat POST always targets /ai/chat/, so the
+     browser's own path is sent along. The backend rejects anything that is
+     not a same-origin absolute path. */
+  const pagePath = window.location.pathname || '/';
+  /* Slightly longer than the server's 55s request budget. */
+  const REQUEST_TIMEOUT_MS = 70000;
   let busy = false;
+  let lastMessage = '';
 
   /* ── CSRF ──
      base.html publishes the token as <meta name="csrf-token">; the cookie is
@@ -129,14 +136,26 @@ function initAiChat() {
     }
 
     busy = true;
+    lastMessage = text;
     input.disabled = true;
     sendBtn.disabled = true;
     messages.setAttribute('aria-busy', 'true');
     hideEmptyState();
-    appendMessage('user', text);
+    const userMessage = appendMessage('user', text);
     input.value = '';
     autoResize();
     showTyping();
+
+    // A failed turn is not stored in session history, so remove the local echo
+    // too; otherwise retrying would show the same question twice.
+    function fail(message) {
+      if (userMessage.isConnected) userMessage.remove();
+      restoreInput(text);
+      appendMessage('error', message);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
 
     try {
       const response = await fetch('/ai/chat/', {
@@ -146,7 +165,8 @@ function initAiChat() {
           'Content-Type': 'application/json',
           'X-Requested-With': 'XMLHttpRequest',
         },
-        body: JSON.stringify({ message: text }),
+        body: JSON.stringify({ message: text, page: pagePath }),
+        signal: controller.signal,
       });
 
       let data = {};
@@ -159,21 +179,50 @@ function initAiChat() {
           window.location.href = loginUrl;
           return;
         }
-        appendMessage('error', data.error || 'Something went wrong. Please try again.');
+        if (response.status === 403) {
+          fail('Your security token expired. Reload the page and try again.');
+          return;
+        }
+        fail(errorMessage(data, response.status));
         return;
       }
 
-      const assistantEl = appendMessage('assistant', data.reply || '');
+      if (!data.reply || !String(data.reply).trim()) {
+        fail('The assistant returned an empty answer. Please try again.');
+        return;
+      }
+
+      lastMessage = '';
+      const assistantEl = appendMessage('assistant', data.reply);
       renderSources(assistantEl, data.sources || []);
-    } catch (_) {
+    } catch (err) {
       removeTyping();
-      appendMessage('error', 'Could not reach the assistant. Check your connection and try again.');
+      if (err && err.name === 'AbortError') {
+        fail('The assistant took too long to answer. Please try again in a moment.');
+      } else {
+        fail('Could not reach the assistant. Check your connection and try again.');
+      }
     } finally {
+      window.clearTimeout(timeoutId);
       busy = false;
       input.disabled = false;
       sendBtn.disabled = false;
       messages.setAttribute('aria-busy', 'false');
       input.focus();
+    }
+  }
+
+  function errorMessage(data, status) {
+    if (data && data.error) return data.error;
+    if (status === 429) return 'The assistant is busy. Please wait a moment and try again.';
+    if (status >= 500) return 'The assistant is temporarily unavailable. Please try again shortly.';
+    return 'Something went wrong. Please try again.';
+  }
+
+  function restoreInput(text) {
+    if (!input.value) {
+      input.value = text || lastMessage || '';
+      autoResize();
     }
   }
 
@@ -240,10 +289,12 @@ function initAiChat() {
     const row = document.createElement('div');
     row.className = 'ai-chat__sources';
     sources.forEach((source) => {
+      const href = safeHref(source.url);
+      if (!href) return;
       const link = document.createElement('a');
       link.className = 'ai-chat__source';
-      link.href = source.url || '#';
-      link.textContent = source.label || source.url;
+      link.href = href;
+      link.textContent = source.label || href;
       if (source.type === 'github') {
         link.target = '_blank';
         link.rel = 'noopener noreferrer';
@@ -254,8 +305,22 @@ function initAiChat() {
       link.prepend(icon);
       row.appendChild(link);
     });
+    if (!row.children.length) return;
     assistantElement.appendChild(row);
     scrollToBottom();
+  }
+
+  /* Only same-origin paths and http(s) URLs may become links. */
+  function safeHref(url) {
+    if (typeof url !== 'string' || !url) return null;
+    if (url.startsWith('/') && !url.startsWith('//')) return url;
+    try {
+      const parsed = new URL(url, window.location.origin);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.href;
+      }
+    } catch (_) { /* invalid URL */ }
+    return null;
   }
 
   function showTyping() {
