@@ -74,6 +74,7 @@ WSGI_APPLICATION = 'contribkit.wsgi.application'
 AUTHENTICATION_BACKENDS = [
     'axes.backends.AxesStandaloneBackend',
     'social_core.backends.google.GoogleOAuth2',
+    'core.auth_backends.ConfiguredGithubOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
 
@@ -145,7 +146,7 @@ AXES_LOCKOUT_TEMPLATE = 'registration/locked_out.html'
 AXES_LOCKOUT_URL = None  # Use template, not redirect
 
 # ---------------------------------------------------------------------------
-# Google OAuth 2.0 (python-social-auth / social-auth-app-django)
+# OAuth 2.0 providers (python-social-auth / social-auth-app-django)
 # Credentials are read from environment variables only — never committed.
 # ---------------------------------------------------------------------------
 SOCIAL_AUTH_JSONFIELD_ENABLED = True  # Store extra_data in a JSONField (works on SQLite)
@@ -158,6 +159,12 @@ SOCIAL_AUTH_GOOGLE_OAUTH2_SCOPE = [
     'https://www.googleapis.com/auth/userinfo.email',
     'https://www.googleapis.com/auth/userinfo.profile',
 ]
+
+# GitHub only needs the user's verified email address for login. No repository,
+# organization, or other scopes are requested.
+SOCIAL_AUTH_GITHUB_KEY = config('GITHUB_OAUTH2_CLIENT_ID', default='')
+SOCIAL_AUTH_GITHUB_SECRET = config('GITHUB_OAUTH2_CLIENT_SECRET', default='')
+SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
 
 # Optional GitHub Personal Access Token (PAT) for higher rate limits
 # (5000/hr instead of 60/hr). Used server-side by repos.github_api and the
@@ -178,27 +185,29 @@ SOCIAL_AUTH_RAISE_EXCEPTIONS = False
 # Hosts a form submission may end up on, used to build the CSP `form-action`
 # directive in core/csp_middleware.py.
 #
-# "Sign in with Google" POSTs a same-origin form to /login/google-oauth2/, which
-# 302-redirects to Google's consent screen. Chrome/Chromium and Safari check
-# `form-action` across the whole redirect chain of a form submission (Firefox
-# does not), so without the Google host listed here the browser blocks the
-# redirect: the button looks dead and the server log only shows a clean
-# `"POST /login/google-oauth2/" 302 0`.
+# "Sign in with Google" and "Sign in with GitHub" POST a same-origin form to
+# /login/<backend>/, which 302-redirects to the provider's consent screen.
+# Chrome/Chromium and Safari check `form-action` across the whole redirect chain
+# of a form submission (Firefox does not), so without the provider host listed
+# here the browser blocks the redirect: the button looks dead and the server log
+# only shows a clean `"POST /login/<backend>/" 302 0`.
 CSP_FORM_ACTION_EXTRA = [
     'https://accounts.google.com',
+    'https://github.com',
 ]
 
-# Custom pipeline: add associate_by_email (before create_user) so a Google
-# login whose verified email already belongs to an existing account is linked
+# Custom pipeline: associate by verified email (before create_user) so a
+# provider login whose email already belongs to an existing account is linked
 # to that account instead of creating a duplicate user. Google verifies email
-# addresses, so this association is safe.
+# addresses; for GitHub, core.auth_pipeline.associate_by_verified_email only
+# trusts addresses GitHub reports as verified.
 SOCIAL_AUTH_PIPELINE = (
     'social_core.pipeline.social_auth.social_details',
     'social_core.pipeline.social_auth.social_uid',
     'social_core.pipeline.social_auth.auth_allowed',
     'social_core.pipeline.social_auth.social_user',
     'social_core.pipeline.user.get_username',
-    'social_core.pipeline.social_auth.associate_by_email',
+    'core.auth_pipeline.associate_by_verified_email',
     'social_core.pipeline.user.create_user',
     'social_core.pipeline.social_auth.associate_user',
     'social_core.pipeline.social_auth.load_extra_data',
