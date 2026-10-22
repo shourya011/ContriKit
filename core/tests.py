@@ -42,6 +42,30 @@ FAKE_USERINFO = {
     'picture': 'https://lh3.googleusercontent.com/a/fake',
 }
 
+FAKE_GITHUB_CLIENT_ID = 'Iv1.fakegithubclientid'
+FAKE_GITHUB_CLIENT_SECRET = 'fake-github-client-secret'
+
+FAKE_GITHUB_TOKEN_RESPONSE = {
+    'access_token': 'gho_fakegithubaccesstoken',
+    'token_type': 'bearer',
+    'scope': 'user:email',
+}
+
+FAKE_GITHUB_USER = {
+    'id': 583231,
+    'login': 'octocat',
+    'name': 'The Octocat',
+    'email': 'octocat@github.com',
+    'emails': [
+        {
+            'email': 'octocat@github.com',
+            'primary': True,
+            'verified': True,
+            'visibility': 'public',
+        },
+    ],
+}
+
 
 def csrf_token(client):
     """Grab a real CSRF token from the login page, as the browser would."""
@@ -64,14 +88,15 @@ class CSPFormActionTests(TestCase):
 
     Chrome/Chromium and Safari enforce `form-action` across the entire redirect
     chain of a form submission, so `'self'` on its own silently kills the
-    "Sign in with Google" button.
+    OAuth buttons.
     """
 
-    def test_form_action_allows_google(self):
+    def test_form_action_allows_google_and_github(self):
         response = self.client.get(reverse('login'))
         csp = _parse_csp(response['Content-Security-Policy'])
         self.assertIn("'self'", csp['form-action'])
         self.assertIn('https://accounts.google.com', csp['form-action'])
+        self.assertIn('https://github.com', csp['form-action'])
 
     def test_form_action_extra_setting_is_respected(self):
         with self.settings(CSP_FORM_ACTION_EXTRA=['https://example.org']):
@@ -195,6 +220,203 @@ class GoogleOAuthFlowTests(TestCase):
             self.client.logout()
 
         self.assertEqual(User.objects.filter(email='ada@example.com').count(), 1)
+
+
+class GitHubOAuthFlowTests(TestCase):
+    """Full "Sign in with GitHub" round trip."""
+
+    def setUp(self):
+        self.settings_override = self.settings(
+            SOCIAL_AUTH_GITHUB_KEY=FAKE_GITHUB_CLIENT_ID,
+            SOCIAL_AUTH_GITHUB_SECRET=FAKE_GITHUB_CLIENT_SECRET,
+        )
+        self.settings_override.enable()
+        self.addCleanup(self.settings_override.disable)
+        self.client = Client(enforce_csrf_checks=True)
+
+    def _begin(self):
+        response = self.client.get(reverse('login'))
+        self.assertContains(response, 'action="/login/github/"')
+        self.assertContains(response, 'Sign in with GitHub')
+
+        token = self.client.cookies['csrftoken'].value
+        response = self.client.post(
+            reverse('social:begin', args=['github']),
+            {'csrfmiddlewaretoken': token},
+            HTTP_REFERER='http://testserver/accounts/login/',
+        )
+        self.assertEqual(response.status_code, 302)
+        location = response['Location']
+        self.assertTrue(
+            location.startswith('https://github.com/login/oauth/authorize?'),
+            f'unexpected redirect target: {location}',
+        )
+
+        params = parse_qs(urlparse(location).query)
+        self.assertEqual(params['client_id'], [FAKE_GITHUB_CLIENT_ID])
+        self.assertEqual(
+            params['redirect_uri'], ['http://testserver/complete/github/']
+        )
+        self.assertEqual(params['scope'], ['user:email'])
+        self.assertIn(
+            'https://github.com',
+            _parse_csp(response['Content-Security-Policy'])['form-action'],
+        )
+        return location
+
+    def _complete(self, location, user_data=None, state=None, code='fake-code'):
+        if state is None:
+            state = parse_qs(urlparse(location).query)['state'][0]
+        with mock.patch(
+            'social_core.backends.github.GithubOAuth2.request_access_token',
+            return_value=dict(FAKE_GITHUB_TOKEN_RESPONSE),
+        ), mock.patch(
+            'social_core.backends.github.GithubOAuth2.user_data',
+            return_value=dict(user_data or FAKE_GITHUB_USER),
+        ):
+            return self.client.get(
+                reverse('social:complete', args=['github']),
+                {'code': code, 'state': state},
+            )
+
+    def test_full_round_trip_creates_and_logs_in_user(self):
+        from accounts.models import User
+        from social_django.models import UserSocialAuth
+
+        response = self._complete(self._begin())
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], settings.LOGIN_REDIRECT_URL)
+
+        user = User.objects.get(email='octocat@github.com')
+        self.assertEqual(user.username, 'octocat')
+        self.assertEqual(user.first_name, 'The')
+        self.assertEqual(user.last_name, 'Octocat')
+        self.assertEqual(user.role, 'viewer')
+
+        social = UserSocialAuth.objects.get(user=user)
+        self.assertEqual(social.provider, 'github')
+        self.assertEqual(social.uid, '583231')
+        self.assertEqual(
+            social.extra_data['access_token'], 'gho_fakegithubaccesstoken'
+        )
+
+        self.assertEqual(self.client.session.get('_auth_user_id'), str(user.pk))
+        self.assertEqual(self.client.get('/dashboard/').status_code, 200)
+
+    def test_second_login_reuses_the_same_account(self):
+        from accounts.models import User
+
+        for _ in range(2):
+            self._complete(self._begin())
+            self.client.logout()
+
+        self.assertEqual(User.objects.filter(email='octocat@github.com').count(), 1)
+
+    def test_verified_email_links_an_existing_account(self):
+        from accounts.models import User
+        from social_django.models import UserSocialAuth
+
+        existing = User.objects.create_user(
+            username='ada_local',
+            email='octocat@github.com',
+            password='pw',
+        )
+
+        self._complete(self._begin())
+
+        social = UserSocialAuth.objects.get(provider='github')
+        self.assertEqual(social.user_id, existing.pk)
+        self.assertEqual(User.objects.count(), 1)
+        self.assertEqual(self.client.session.get('_auth_user_id'), str(existing.pk))
+
+    def test_unverified_email_is_not_used_to_link_an_existing_account(self):
+        from accounts.models import User
+        from social_django.models import UserSocialAuth
+
+        existing = User.objects.create_user(
+            username='ada_local',
+            email='octocat@github.com',
+            password='pw',
+        )
+        user_data = dict(FAKE_GITHUB_USER)
+        user_data['emails'] = [
+            {
+                'email': 'octocat@github.com',
+                'primary': True,
+                'verified': False,
+                'visibility': 'private',
+            },
+        ]
+
+        self._complete(self._begin(), user_data=user_data)
+
+        self.assertFalse(UserSocialAuth.objects.filter(user=existing).exists())
+        new_user = UserSocialAuth.objects.get(provider='github').user
+        self.assertNotEqual(new_user.pk, existing.pk)
+        self.assertEqual(User.objects.count(), 2)
+
+    def test_missing_email_still_creates_an_account(self):
+        from accounts.models import User
+
+        user_data = {
+            'id': 583231,
+            'login': 'octocat',
+            'name': 'The Octocat',
+            'email': '',
+            'emails': [],
+        }
+
+        response = self._complete(self._begin(), user_data=user_data)
+
+        self.assertEqual(response.status_code, 302)
+        user = User.objects.get(username='octocat')
+        self.assertEqual(user.email, '')
+        self.assertEqual(self.client.session.get('_auth_user_id'), str(user.pk))
+
+    def test_invalid_state_is_rejected(self):
+        from accounts.models import User
+        from social_django.models import UserSocialAuth
+
+        response = self._complete(self._begin(), state='tampered-state')
+
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response['Location'], settings.SOCIAL_AUTH_LOGIN_ERROR_URL)
+        self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(UserSocialAuth.objects.count(), 0)
+
+    def test_missing_github_credentials_do_not_break_google(self):
+        with self.settings(
+            SOCIAL_AUTH_GITHUB_KEY='',
+            SOCIAL_AUTH_GITHUB_SECRET='',
+            SOCIAL_AUTH_GOOGLE_OAUTH2_KEY=FAKE_CLIENT_ID,
+            SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET=FAKE_CLIENT_SECRET,
+        ):
+            token = csrf_token(self.client)
+            response = self.client.post(
+                reverse('social:begin', args=['github']),
+                {'csrfmiddlewaretoken': token},
+                HTTP_REFERER='http://testserver/accounts/login/',
+            )
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(
+                response['Location'], settings.SOCIAL_AUTH_LOGIN_ERROR_URL
+            )
+            self.assertContains(
+                self.client.get(response['Location']),
+                'GITHUB_OAUTH2_CLIENT_ID',
+            )
+
+            token = csrf_token(self.client)
+            response = self.client.post(
+                reverse('social:begin', args=['google-oauth2']),
+                {'csrfmiddlewaretoken': token},
+                HTTP_REFERER='http://testserver/accounts/login/',
+            )
+            self.assertEqual(response.status_code, 302)
+            self.assertTrue(
+                response['Location'].startswith('https://accounts.google.com/')
+            )
 
 
 class CsrfAjaxTests(TestCase):

@@ -845,12 +845,14 @@ pre.code-block {
   background: var(--color-slate-200);
 }
 
-.btn-google {
+.btn-google,
+.btn-github {
   text-decoration: none;
   color: var(--color-slate-800);
 }
 
-.btn-google:hover {
+.btn-google:hover,
+.btn-github:hover {
   color: var(--color-slate-900);
   text-decoration: none;
 }
