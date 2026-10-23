@@ -285,3 +285,42 @@ Add another entry here whenever you wire up an extra OAuth provider. Open DevToo
 **The callback works but you get bounced back to the login page** — social-auth caught an exception. `SOCIAL_AUTH_RAISE_EXCEPTIONS = False` routes it through `SocialAuthExceptionMiddleware` as a flash message instead of a stack trace, so read the message on the login page rather than the traceback.
 
 **Everything 301-redirects to `https://localhost:8000` and the page won't load** — you are running the *prod* settings module, where `SECURE_SSL_REDIRECT=True`. `manage.py` selects dev settings by default, so this only happens if `DJANGO_SETTINGS_MODULE=contribkit.settings.prod` was exported in your shell. Unset it for local work.
+
+---
+
+## Sign in with GitHub (OAuth 2.0)
+
+Uses the same python-social-auth stack as Google and exposes `/login/github/` (start) and `/complete/github/` (callback).
+
+### 1. Create the OAuth App
+
+GitHub → **Settings → Developer settings → OAuth Apps → New OAuth App**.
+
+Set the **Homepage URL** to the origin you browse the app from, and the **Authorization callback URL** to that origin plus `/complete/github/`.
+
+### 2. Register the callback URL
+
+The callback path is **`/complete/github/`**, including the trailing slash. `localhost` and `127.0.0.1` are different origins, so register each one you use:
+
+| Where you run it | Authorization callback URL |
+| --- | --- |
+| `runserver`, browsing `localhost` | `http://localhost:8000/complete/github/` |
+| `runserver`, browsing `127.0.0.1` | `http://127.0.0.1:8000/complete/github/` |
+| PythonAnywhere | `https://yourusername.pythonanywhere.com/complete/github/` |
+
+### 3. Put the credentials in `.env`
+
+```dotenv
+GITHUB_OAUTH2_CLIENT_ID=Iv1.abcdef1234567890
+GITHUB_OAUTH2_CLIENT_SECRET=github-oauth-secret
+```
+
+`base.py` reads these into `SOCIAL_AUTH_GITHUB_KEY` / `SOCIAL_AUTH_GITHUB_SECRET`. Never commit them. The separate `GITHUB_PAT` setting is only for API rate limits and is not used for login.
+
+ContriKit requests only the `user:email` scope. GitHub accounts are resolved by their stable numeric user ID. An email is used to link an existing ContriKit account only when GitHub reports it as verified; missing, private, or unverified addresses get a separate account instead of an unsafe automatic link.
+
+If the GitHub credentials are missing, only the GitHub button fails (with a message on the login page); Google and password login are unaffected.
+
+### Troubleshooting
+
+The CSP `form-action` rule described above also applies here. `https://github.com` is included in `CSP_FORM_ACTION_EXTRA`, so the consent-screen redirect is allowed. A denial from GitHub (or a mismatched callback URL) is shown as a flash message on the login page.
