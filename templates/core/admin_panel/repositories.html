@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Tracked Repositories — Admin Panel{% endblock %}
+
+{% block content %}
+<div class="container-app" style="padding-bottom:64px;">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <span class="badge bg-danger mb-1"><i class="bi bi-shield-lock-fill me-1"></i>Platform Admin</span>
+      <h2 class="fw-bold mb-0">Tracked GitHub Repositories</h2>
+      <p class="text-muted small mb-0 mt-1">
+        Issues carrying a beginner-friendly label are imported automatically by
+        <code>python manage.py sync_github_issues</code>.
+      </p>
+    </div>
+    <a href="/admin-panel/issues/" class="btn btn-outline-secondary btn-sm">Moderate Issues →</a>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-4">
+      <div class="card p-4 bg-white shadow-sm border-0">
+        <h5 class="fw-bold mb-3">Track a Repository</h5>
+        <form method="POST" action="/admin-panel/repositories/">
+          {% csrf_token %}
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">GitHub Repository URL</label>
+            <input type="url" name="github_url" class="form-control" required
+                   placeholder="https://github.com/owner/repository"
+                   value="{{ form.github_url.value|default:'' }}">
+            <div class="form-text small text-muted">Public repositories only. Metadata is filled in when available.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Display Name (optional)</label>
+            <input type="text" name="name" class="form-control" placeholder="owner/repository">
+          </div>
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Language (optional)</label>
+            <input type="text" name="language" class="form-control" placeholder="Python">
+          </div>
+          <input type="hidden" name="stars" value="0">
+          <input type="hidden" name="description" value="">
+          <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" name="is_active" id="isActive" checked>
+            <label class="form-check-label small" for="isActive">Include in automatic synchronization</label>
+          </div>
+          <button type="submit" class="btn btn-primary w-100 fw-semibold">Add Repository</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card p-4 bg-white shadow-sm border-0">
+        <h5 class="fw-bold mb-3">Tracked Repositories ({{ repos.count }})</h5>
+        {% if repos %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light small text-muted text-uppercase">
+                <tr>
+                  <th>Repository</th>
+                  <th>Status</th>
+                  <th>Last synced</th>
+                  <th class="text-end">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for repo in repos %}
+                  <tr>
+                    <td>
+                      <a href="{{ repo.github_url }}" target="_blank" rel="noopener noreferrer" class="fw-bold text-dark text-decoration-none">{{ repo.name }}</a>
+                      <div class="small text-muted">{{ repo.language|default:"Unknown language" }}</div>
+                      {% if repo.last_sync_error %}
+                        <div class="small text-danger mt-1">{{ repo.last_sync_error|truncatechars:120 }}</div>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if repo.is_active %}
+                        <span class="badge bg-success">Active</span>
+                      {% else %}
+                        <span class="badge bg-secondary">Paused</span>
+                      {% endif %}
+                    </td>
+                    <td class="small text-muted">
+                      {% if repo.last_synced_at %}{{ repo.last_synced_at|date:"M d, Y H:i" }}{% else %}Never{% endif %}
+                    </td>
+                    <td class="text-end">
+                      <form method="POST" action="/admin-panel/repositories/" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="repo_id" value="{{ repo.id }}">
+                        <input type="hidden" name="action" value="toggle_active">
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">
+                          {% if repo.is_active %}Pause{% else %}Resume{% endif %}
+                        </button>
+                      </form>
+                      <form method="POST" action="/admin-panel/repositories/" class="d-inline">
+                        {% csrf_token %}
+                        <input type="hidden" name="repo_id" value="{{ repo.id }}">
+                        <input type="hidden" name="action" value="reset_checkpoint">
+                        <button type="submit" class="btn btn-sm btn-outline-dark" title="Force a full synchronization pass">Reset sync</button>
+                      </form>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="empty-state">
+            <p class="text-muted small mb-0">No repositories are tracked yet. Add one to start importing beginner-friendly issues.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

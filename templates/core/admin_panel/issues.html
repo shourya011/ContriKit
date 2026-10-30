@@ -19,7 +19,7 @@
             <tr>
               <th>Title</th>
               <th>Repo</th>
-              <th>Posted By</th>
+              <th>Source</th>
               <th>Status</th>
               <th>Featured</th>
               <th class="text-end">Moderation</th>
@@ -32,7 +32,7 @@
                   <a href="/issues/{{ issue.id }}/" target="_blank" class="fw-bold text-dark text-decoration-none">{{ issue.title }} ↗</a>
                 </td>
                 <td><span class="badge bg-secondary bg-opacity-10 text-dark">{{ issue.repo.name }}</span></td>
-                <td>{{ issue.posted_by.username }}</td>
+                <td>{% if issue.posted_by %}{{ issue.posted_by.username }}{% else %}<span class="badge bg-dark bg-opacity-10 text-dark">GitHub</span>{% endif %}</td>
                 <td><span class="badge {% if issue.status == 'open' %}bg-success{% else %}bg-secondary{% endif %}">{{ issue.status }}</span></td>
                 <td>
                   <form method="POST" action="/admin-panel/issues/">

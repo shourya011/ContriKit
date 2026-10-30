@@ -16,7 +16,6 @@ INSTALLED_APPS = [
 
     # Custom apps
     'accounts',
-    'repos',
     'issues',
     'templates_app',
     'cheatsheet',
@@ -166,10 +165,20 @@ SOCIAL_AUTH_GITHUB_KEY = config('GITHUB_OAUTH2_CLIENT_ID', default='')
 SOCIAL_AUTH_GITHUB_SECRET = config('GITHUB_OAUTH2_CLIENT_SECRET', default='')
 SOCIAL_AUTH_GITHUB_SCOPE = ['user:email']
 
-# Optional GitHub Personal Access Token (PAT) for higher rate limits
-# (5000/hr instead of 60/hr). Used server-side by repos.github_api and the
-# AI GitHub tools; never exposed to templates or JavaScript.
-GITHUB_PAT = config('GITHUB_PAT', default='')
+# GitHub API token used by the issue synchronization worker and the AI GitHub
+# tools. Read from the environment only; never exposed to templates or JS.
+# GITHUB_PAT remains accepted as a backwards-compatible alias.
+GITHUB_TOKEN = config('GITHUB_TOKEN', default='') or config('GITHUB_PAT', default='')
+GITHUB_PAT = GITHUB_TOKEN
+
+# Issue synchronization cadence and networking.
+GITHUB_SYNC_INTERVAL = config('GITHUB_SYNC_INTERVAL', default=120, cast=int)
+GITHUB_SYNC_FULL_INTERVAL = config('GITHUB_SYNC_FULL_INTERVAL', default=3600, cast=int)
+GITHUB_SYNC_TIMEOUT = config('GITHUB_SYNC_TIMEOUT', default=10, cast=int)
+GITHUB_SYNC_MAX_RETRIES = config('GITHUB_SYNC_MAX_RETRIES', default=3, cast=int)
+GITHUB_SYNC_BACKOFF = config('GITHUB_SYNC_BACKOFF', default=1.0, cast=float)
+GITHUB_SYNC_PAGE_SIZE = config('GITHUB_SYNC_PAGE_SIZE', default=100, cast=int)
+GITHUB_SYNC_MAX_PAGES = config('GITHUB_SYNC_MAX_PAGES', default=100, cast=int)
 
 # Where social auth should land / start / go on failure.
 SOCIAL_AUTH_LOGIN_URL = '/accounts/login/'

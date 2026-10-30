@@ -27,7 +27,6 @@ def build_user_context(user) -> dict:
         "role": getattr(user, "role", "viewer"),
         "github_username": getattr(user, "github_username", "") or "",
         "bio": (getattr(user, "bio", "") or "")[:500],
-        "is_editor": bool(getattr(user, "is_editor", False)),
         "is_platform_admin": bool(getattr(user, "is_platform_admin", False)),
     }
 

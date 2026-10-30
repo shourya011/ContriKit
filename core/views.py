@@ -1,10 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from django.contrib import messages
 from django.db.models import Count, Sum
 from django.http import JsonResponse
-from issues.models import Issue, SavedIssue, Tag
-from repos.models import Repo
+from issues.models import Issue, SavedIssue, Tag, Repo
 from templates_app.models import Template
 
 def landing_page(request):
@@ -47,30 +45,9 @@ def dashboard_view(request):
         'open_issues_count': Issue.objects.filter(status='open').count(),
     }
 
-    if user.is_editor:
-        context['posted_issues_count'] = Issue.objects.filter(posted_by=user).count()
-        context['editor_repos_count'] = Repo.objects.filter(editor=user).count()
-
     return render(request, 'core/dashboard.html', context)
 
 @login_required
 def saved_issues_list_view(request):
     saved_issues = SavedIssue.objects.filter(user=request.user).select_related('issue', 'issue__repo').order_by('-saved_at')
     return render(request, 'core/saved_issues.html', {'saved_issues': saved_issues})
-
-@login_required
-def switch_role_view(request):
-    if request.method == 'POST':
-        new_role = request.POST.get('role', 'editor')
-        if new_role == 'editor':
-            request.user.role = 'editor'
-            request.user.save()
-            messages.success(request, "Congratulations! You are now an Editor. You can post issues and manage repositories.")
-            return redirect('/editor/repos/')
-        elif new_role == 'viewer':
-            if not request.user.is_superuser and request.user.role != 'admin':
-                request.user.role = 'viewer'
-                request.user.save()
-                messages.info(request, "You have switched back to Viewer role. Your editor data is safely preserved.")
-            return redirect('/dashboard/')
-    return redirect('/dashboard/')

@@ -1,29 +1,32 @@
 from django import forms
-from .models import Issue, Tag
 
-class IssueForm(forms.ModelForm):
-    tags = forms.ModelMultipleChoiceField(
-        queryset=Tag.objects.all(),
-        required=False,
-        widget=forms.SelectMultiple(attrs={'class': 'form-select', 'size': '4'}),
-        help_text="Hold Ctrl/Cmd to select multiple tech tags."
-    )
+from .models import Repo
+
+
+class RepoForm(forms.ModelForm):
+    """Admin-facing form for adding a tracked GitHub repository."""
+
+    name = forms.CharField(required=False)
+    language = forms.CharField(required=False)
+    description = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}))
+    stars = forms.IntegerField(required=False, initial=0)
 
     class Meta:
-        model = Issue
-        fields = ('repo', 'title', 'description', 'github_issue_url', 'difficulty', 'estimated_hours', 'status', 'tags')
+        model = Repo
+        fields = ('github_url', 'name', 'language', 'stars', 'description', 'is_active')
         widgets = {
-            'repo': forms.Select(attrs={'class': 'form-select'}),
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Add validation to search form'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': '5', 'placeholder': 'Provide clear context and steps for the beginner...'}),
-            'github_issue_url': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://github.com/owner/repo/issues/123'}),
-            'difficulty': forms.Select(attrs={'class': 'form-select'}),
-            'estimated_hours': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.5', 'placeholder': '2.0'}),
-            'status': forms.Select(attrs={'class': 'form-select'}),
+            'github_url': forms.URLInput(
+                attrs={'class': 'form-control', 'placeholder': 'https://github.com/owner/repo'}
+            ),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'owner/repo'}),
+            'language': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-    def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # Limit repos to user's repos if not admin
-        if not user.is_platform_admin:
-            self.fields['repo'].queryset = user.repos.filter(is_active=True)
+    def clean_github_url(self):
+        url = (self.cleaned_data['github_url'] or '').strip().rstrip('/')
+        if 'github.com' not in url:
+            raise forms.ValidationError('Enter a github.com repository URL.')
+        parts = [part for part in url.split('github.com/', 1)[-1].split('/') if part]
+        if len(parts) < 2:
+            raise forms.ValidationError('Use the form https://github.com/owner/repository.')
+        return url

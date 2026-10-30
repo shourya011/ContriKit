@@ -2,8 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from accounts.models import User
-from repos.models import Repo
-from issues.models import Tag, Issue, SavedIssue
+from issues.models import Tag, Issue, Repo, SavedIssue
 from templates_app.models import Template
 from cheatsheet.models import CheatSheetSection, CheatSheetCommand
 
@@ -25,16 +24,6 @@ class Command(BaseCommand):
             admin_user.set_password("adminpass123")
             admin_user.save()
 
-        editor_user, _ = User.objects.get_or_create(username="demo_editor", defaults={
-            "email": "editor@contribkit.com",
-            "role": "editor",
-            "github_username": "torvalds",
-            "bio": "Open source maintainer passionate about beginner onboarding."
-        })
-        if not editor_user.check_password("editorpass123"):
-            editor_user.set_password("editorpass123")
-            editor_user.save()
-
         viewer_user, _ = User.objects.get_or_create(username="demo_viewer", defaults={
             "email": "viewer@contribkit.com",
             "role": "viewer",
@@ -45,7 +34,7 @@ class Command(BaseCommand):
             viewer_user.set_password("viewerpass123")
             viewer_user.save()
 
-        self.stdout.write(self.style.SUCCESS("✓ Users seeded (admin, demo_editor, demo_viewer)"))
+        self.stdout.write(self.style.SUCCESS("✓ Users seeded (admin, demo_viewer)"))
 
         # 2. Create Tags
         tags_data = [
@@ -75,7 +64,6 @@ class Command(BaseCommand):
         repo_objs = {}
         for url, name, lang, stars, desc in repos_data:
             r, _ = Repo.objects.update_or_create(github_url=url, defaults={
-                "editor": editor_user,
                 "name": name,
                 "language": lang,
                 "stars": stars,
@@ -125,7 +113,7 @@ class Command(BaseCommand):
                 url = f"https://github.com/{r.name}/issues/{abs(hash(title)) % 9000 + 100}"
                 iss, _ = Issue.objects.update_or_create(title=title, defaults={
                     "repo": r,
-                    "posted_by": editor_user,
+                    "posted_by": None,
                     "description": desc,
                     "github_issue_url": url,
                     "difficulty": diff,

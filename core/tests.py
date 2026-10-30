@@ -18,7 +18,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from issues.models import Issue
-from repos.models import Repo
+from issues.models import Repo
 
 
 FAKE_CLIENT_ID = '1234567890-abcdefghijklmnop.apps.googleusercontent.com'
@@ -444,7 +444,6 @@ class CsrfAjaxTests(TestCase):
         cls.user = User.objects.create_user(username='csrf_viewer', password='pw')
         cls.editor = User.objects.create_user(username='csrf_editor', password='pw')
         cls.repo = Repo.objects.create(
-            editor=cls.editor,
             github_url='https://github.com/django/django',
             name='django/django',
             language='Python',

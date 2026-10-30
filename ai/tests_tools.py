@@ -18,7 +18,7 @@ from ai.services.tools import ToolContext, build_default_tool_registry
 from ai.services.tools.cheatsheet import SearchGitCommandsTool as CSSearch
 from cheatsheet.models import CheatSheetCommand, CheatSheetSection
 from issues.models import Issue, SavedIssue, Tag
-from repos.models import Repo
+from issues.models import Repo
 from templates_app.models import Template
 
 User = get_user_model()
@@ -44,7 +44,7 @@ class ToolsTestCase(TestCase):
     def setUpTestData(cls):
         cls.user_a = User.objects.create_user(username="alice", password="pw")
         cls.user_b = User.objects.create_user(username="bob", password="pw")
-        cls.editor = User.objects.create_user(username="carol", password="pw", role="editor")
+        cls.editor = User.objects.create_user(username="carol", password="pw")
 
         cls.python_tag = Tag.objects.create(name="Python", slug="python", color="#3776ab")
         cls.docs_tag = Tag.objects.create(name="Documentation", slug="documentation", color="#6366f1")
@@ -52,7 +52,6 @@ class ToolsTestCase(TestCase):
         cls.css_tag = Tag.objects.create(name="CSS/HTML", slug="css-html", color="#e11d48")
 
         cls.repo = Repo.objects.create(
-            editor=cls.editor,
             github_url="https://github.com/django/django",
             name="django/django",
             language="Python",
@@ -60,7 +59,6 @@ class ToolsTestCase(TestCase):
             description="The web framework for perfectionists with deadlines.",
         )
         cls.repo_js = Repo.objects.create(
-            editor=cls.editor,
             github_url="https://github.com/twbs/bootstrap",
             name="twbs/bootstrap",
             language="JavaScript",
@@ -220,7 +218,7 @@ class ToolsTestCase(TestCase):
         self.assertEqual(result_none["count"], 0)
 
     # ── GitHub tools (mock the shared client's HTTP) ────────────────────
-    @mock.patch("repos.github_api.requests.get")
+    @mock.patch("issues.github_api.requests.get")
     def test_get_github_repository_ok(self, mock_get):
         mock_response = mock.Mock(status_code=200)
         mock_response.headers = {}
@@ -243,7 +241,7 @@ class ToolsTestCase(TestCase):
         self.assertEqual(result["repository"]["full_name"], "django/django")
         self.assertEqual(result["repository"]["stars"], 81200)
 
-    @mock.patch("repos.github_api.requests.get")
+    @mock.patch("issues.github_api.requests.get")
     def test_get_github_repository_404_is_controlled_error(self, mock_get):
         mock_get.return_value = mock.Mock(
             status_code=404, headers={}, json=lambda: {}, text="nf"
@@ -252,21 +250,21 @@ class ToolsTestCase(TestCase):
         self.assertIn("error", result)
         self.assertEqual(result["status_code"], 404)
 
-    @override_settings(GITHUB_PAT="ghp_super_secret")
-    @mock.patch("repos.github_api.requests.get")
-    def test_github_pat_used_server_side_only(self, mock_get):
+    @override_settings(GITHUB_TOKEN="ghp_super_secret", GITHUB_PAT="ghp_super_secret")
+    @mock.patch("issues.github_api.requests.get")
+    def test_github_token_used_server_side_only(self, mock_get):
         mock_get.return_value = mock.Mock(
             status_code=200, headers={},
             json=lambda: {"full_name": "a/b", "topics": []},
         )
         GetGitHubRepositoryTool().run(ToolContext(), owner="a", repo="b")
         headers = mock_get.call_args.kwargs["headers"]
-        self.assertEqual(headers["Authorization"], "token ghp_super_secret")
+        self.assertEqual(headers["Authorization"], "Bearer ghp_super_secret")
         # The result dict must never contain the token.
         result = GetGitHubRepositoryTool().run(ToolContext(), owner="a", repo="b")
         self.assertNotIn("ghp_super_secret", str(result))
 
-    @mock.patch("repos.github_api.requests.get")
+    @mock.patch("issues.github_api.requests.get")
     def test_get_github_beginner_issues(self, mock_get):
         issue_payload = [
             {
@@ -303,11 +301,12 @@ class ToolsTestCase(TestCase):
         result = GetUserContextTool().run(ToolContext(user=None))
         self.assertEqual(result, {"authenticated": False})
 
-    def test_user_context_editor(self):
+    def test_user_context_does_not_expose_editor_internals(self):
         result = GetUserContextTool().run(ToolContext(user=self.editor))
-        self.assertEqual(result["role"], "editor")
-        self.assertEqual(result["posted_issues_count"], 4)
-        self.assertEqual(result["linked_repos_count"], 2)
+        self.assertEqual(result["role"], "viewer")
+        self.assertNotIn("is_editor", result)
+        self.assertNotIn("posted_issues_count", result)
+        self.assertNotIn("linked_repos_count", result)
 
     # ── Page context tools ──────────────────────────────────────────────
     def test_current_issue_context_from_path(self):

@@ -23,7 +23,7 @@ RULES = (
     "- Cite what you use: reference ContribKit issue ids/links, template "
     "slugs, and real commands from tool results.\n"
     "- Respect access rules: never claim to see another user's private data, "
-    "saved issues, or editor-only Admin content.\n"
+    "saved issues, or Admin-only content.\n"
     "- Be concise, beginner-friendly, and actionable. Commands may be shown "
     "as code snippets, but never promise actions on the user's behalf."
 )

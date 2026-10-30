@@ -39,8 +39,6 @@
         {% if user.is_authenticated %}
           {% if is_platform_admin %}
             <span class="badge bg-danger badge-role"><i class="bi bi-shield-lock-fill"></i> Admin</span>
-          {% elif is_editor %}
-            <span class="badge bg-indigo text-white badge-role"><i class="bi bi-pencil-square"></i> Editor</span>
           {% endif %}
 
           {% if is_platform_admin %}
@@ -51,27 +49,12 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" href="/admin-panel/users/">Manage Users</a></li>
                 <li><a class="dropdown-item" href="/admin-panel/issues/">Moderate Issues</a></li>
+                <li><a class="dropdown-item" href="/admin-panel/repositories/">Tracked Repositories</a></li>
                 <li><a class="dropdown-item" href="/admin-panel/templates/">Template Library</a></li>
                 <li><a class="dropdown-item" href="/admin-panel/cheatsheet/">Cheat Sheet</a></li>
                 <li><hr class="dropdown-divider"></li>
                 <li><a class="dropdown-item" href="/admin-panel/analytics/">Platform Stats</a></li>
                 <li><a class="dropdown-item text-muted" href="admin/" target="_blank"><small>Raw Django Admin ↗</small></a></li>
-              </ul>
-            </div>
-          {% endif %}
-
-          {% if is_editor %}
-            <div class="dropdown">
-              <button class="btn btn-ghost btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                <i class="bi bi-code-square"></i> Editor
-              </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="/editor/repos/">My Repositories</a></li>
-                <li><a class="dropdown-item" href="/editor/issues/">My Posted Issues</a></li>
-                <li><a class="dropdown-item" href="/editor/issues/create/">Post New Issue</a></li>
-                <li><a class="dropdown-item" href="/editor/issues/import/">Bulk GitHub Import</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="/editor/analytics/">Repo Analytics</a></li>
               </ul>
             </div>
           {% endif %}
@@ -85,16 +68,6 @@
               <li><a class="dropdown-item" href="/dashboard/"><i class="bi bi-speedometer2 me-2"></i>My Dashboard</a></li>
               <li><a class="dropdown-item" href="/dashboard/saved/"><i class="bi bi-bookmark-fill me-2"></i>Saved Issues</a></li>
               <li><hr class="dropdown-divider"></li>
-              {% if is_editor and not is_platform_admin %}
-                <li>
-                  <form action="/dashboard/switch-role/" method="POST" class="px-2 py-1">
-                    {% csrf_token %}
-                    <input type="hidden" name="role" value="viewer">
-                    <button type="submit" class="btn btn-sm btn-secondary w-100">Switch to Viewer</button>
-                  </form>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-              {% endif %}
               <li><a class="dropdown-item" href="/accounts/password-change/"><i class="bi bi-key me-2"></i>Change Password</a></li>
               <li><hr class="dropdown-divider"></li>
               <li>

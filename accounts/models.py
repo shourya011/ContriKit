@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 class User(AbstractUser):
-    ROLE_CHOICES = [("viewer", "Viewer"), ("editor", "Editor"), ("admin", "Admin")]
+    ROLE_CHOICES = [("viewer", "Viewer"), ("admin", "Admin")]
     role = models.CharField(max_length=10, choices=ROLE_CHOICES, default="viewer")
     github_username = models.CharField(max_length=100, blank=True)
     bio = models.TextField(blank=True)
@@ -16,10 +16,6 @@ class User(AbstractUser):
     @property
     def is_viewer(self):
         return self.role == "viewer"
-
-    @property
-    def is_editor(self):
-        return self.role == "editor" or self.role == "admin"
 
     @property
     def is_platform_admin(self):

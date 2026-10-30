@@ -1,11 +1,11 @@
 """GitHub tools: thin wrappers over the project's shared GitHub client.
 
-Reuses ``repos.github_api`` (the same code the editor repo linking and bulk
-import views use) — no GitHub API logic is duplicated. The optional
-``GITHUB_PAT`` is applied server-side and never returned to the model.
+Reuses ``issues.github_api`` (the same client the issue synchronization
+service uses) — no GitHub API logic is duplicated. ``GITHUB_TOKEN`` is applied
+server-side and never returned to the model.
 """
 
-from repos.github_api import fetch_github_issues_api, get_repository, parse_github_url
+from issues.github_api import fetch_github_issues_api, get_repository, parse_github_url
 
 from .base import AITool, ToolContext
 
@@ -68,10 +68,9 @@ class GetGitHubBeginnerIssuesTool(AITool):
 
     name = "get_github_beginner_issues"
     description = (
-        "Fetch open GitHub issues labeled 'good first issue'/'beginner'/'starter' "
-        "for a repository, using the same bulk import logic as the editor tools. "
-        "Use when the user asks about live GitHub issues beyond ContribKit's "
-        "curated board."
+        "Fetch open GitHub issues carrying one of ContribKit's tracked "
+        "beginner-friendly labels for a repository. Use when the user asks "
+        "about live GitHub issues beyond ContribKit's curated board."
     )
     parameters = {
         "type": "object",

@@ -7,18 +7,17 @@
 
 ## Product Overview
 
-**ContribKit** solves the hardest part of open source: beginner onboarding. Maintainers ("Editors") post structured contribution opportunities enriched with copy-paste repository standard templates, estimated hours, difficulty tags, and direct GitHub links. Beginners ("Viewers") discover curated starter issues without getting lost in massive unfamiliar codebases.
+**ContribKit** solves the hardest part of open source: beginner onboarding. Tracked repositories are synchronized automatically with the GitHub API, so beginner-friendly issues stay current without manual posting. Beginners ("Viewers") discover curated starter issues without getting lost in massive unfamiliar codebases.
 
 ### Key Features
 1. **Curated Issue Board (`/issues/`)**: Structured beginner-friendly opportunities filterable by programming language, difficulty level (`Beginner` / `Intermediate`), and tech stack tags (`Python`, `React`, `Django`, `TypeScript`, etc.). Searchable via multi-field keyword queries.
 2. **Repository Template Library (`/templates/`)**: Copy-paste-ready standard markdown files (`README.md`, `CONTRIBUTING.md`, `ISSUE_TEMPLATE.md`, `PULL_REQUEST_TEMPLATE.md`, `CODE_OF_CONDUCT.md`) with one-click JS clipboard copying.
 3. **Interactive Git Cheat Sheet (`/cheatsheet/`)**: 30+ searchable Git workflows grouped into setup, staging, branching, PR syncing, and undoing mistakes. Instant client-side filtering without page reloads.
-4. **GitHub API Integration**: 
-   - **URL Auto-fill (`/editor/repos/`)**: Pasting any public GitHub repository URL validates live against `api.github.com`, auto-filling repo name, star counts, primary language, and description.
-   - **Bulk Issue Import (`/editor/issues/import/`)**: Bulk-fetches open candidate issues labeled `good first issue`, `beginner`, or `starter` for human review before publishing.
-5. **Multi-Tier Role Architecture**:
-   - **Viewer**: Default for new signups. Browse issues, explore templates, bookmark issues to dashboard via AJAX, and self-upgrade anytime.
-   - **Editor**: Self-upgradable with zero approval bottlenecks. Link repos, post opportunities, import GitHub candidates, and analyze repository view metrics. Can switch back to Viewer anytime without data loss.
+4. **Automatic GitHub Synchronization**:
+   - **Scheduled Issue Sync**: A background worker (`python manage.py sync_github_issues --watch`) polls every tracked repository and imports issues carrying an approved beginner label (`good first issue`, `beginner`, `easy`, `starter`, `documentation`, `help wanted`, etc.). Pull requests are always excluded.
+   - **Status Reconciliation**: Incremental passes use an overlapping checkpoint; an hourly full pass closes issues that were closed or removed on GitHub. Repositories, checkpoints, and last-run status are managed at `/admin-panel/repositories/`.
+5. **Two-Tier Role Architecture**:
+   - **Viewer**: Default for every new signup. Browse issues, explore templates, and bookmark issues to the dashboard via AJAX.
    - **Admin**: Full moderation suite. Manage users/roles, moderate/remove issues, toggle featured badges (`⭐ Featured`), CRUD template library files, CRUD cheat sheet sections/commands, and view platform distribution charts.
 
 ---
@@ -26,8 +25,8 @@
 ## Platform Screens & Walkthrough
 
 - **Landing Page (`/`)**: High-impact hero CTA, live aggregated database counts (Issues, Templates, Active Repos), and featured opportunities grid.
-- **Maintainer Hub (`/dashboard/` & `/editor/repos/`)**: Role switching badges, AJAX bookmark previews, and instant GitHub URL validation.
-- **Analytics Dashboards (`/editor/analytics/` & `/admin-panel/analytics/`)**: Visual Chart.js metrics tracking total session views, bookmark save conversions, and role distributions.
+- **Viewer Dashboard (`/dashboard/`)**: Saved-issue summaries with AJAX bookmark previews.
+- **Repository & Analytics Console (`/admin-panel/repositories/`, `/admin-panel/analytics/`)**: Visual Chart.js metrics tracking total session views, bookmark save conversions, and role distributions, plus tracked-repository controls.
 
 ---
 
@@ -63,6 +62,7 @@
    ```bash
    python test_all_routes.py        # Runs 100% automated smoke tests across 20+ routes
    python manage.py test            # Unit tests, incl. the full Google OAuth round trip
+   python manage.py sync_github_issues   # One-shot GitHub issue sync (needs GITHUB_TOKEN)
    python manage.py runserver
    ```
    Visit `http://127.0.0.1:8000/` in your browser.
@@ -315,7 +315,7 @@ GITHUB_OAUTH2_CLIENT_ID=Iv1.abcdef1234567890
 GITHUB_OAUTH2_CLIENT_SECRET=github-oauth-secret
 ```
 
-`base.py` reads these into `SOCIAL_AUTH_GITHUB_KEY` / `SOCIAL_AUTH_GITHUB_SECRET`. Never commit them. The separate `GITHUB_PAT` setting is only for API rate limits and is not used for login.
+`base.py` reads these into `SOCIAL_AUTH_GITHUB_KEY` / `SOCIAL_AUTH_GITHUB_SECRET`. Never commit them. The separate `GITHUB_TOKEN` setting is only used by the issue-synchronization worker, not for login.
 
 ContriKit requests only the `user:email` scope. GitHub accounts are resolved by their stable numeric user ID. An email is used to link an existing ContriKit account only when GitHub reports it as verified; missing, private, or unverified addresses get a separate account instead of an unsafe automatic link.
 

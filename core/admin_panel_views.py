@@ -1,10 +1,12 @@
-import json
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
+from django.db import IntegrityError
 from django.db.models import Count
 from core.decorators import admin_required
 from accounts.models import User
-from issues.models import Issue, Tag
+from issues.forms import RepoForm
+from issues.models import Issue, Repo
+from issues.github_api import get_repository, parse_github_url
 from templates_app.models import Template
 from cheatsheet.models import CheatSheetSection, CheatSheetCommand
 
@@ -49,6 +51,77 @@ def admin_issues_view(request):
         return redirect('/admin-panel/issues/')
 
     return render(request, 'core/admin_panel/issues.html', {'issues': issues})
+
+@admin_required
+def admin_repositories_view(request):
+    """Manage the repositories whose GitHub issues are synchronized."""
+    repos = Repo.objects.order_by('name')
+
+    if request.method == 'POST':
+        action = request.POST.get('action')
+        repo_id = request.POST.get('repo_id')
+        repo = get_object_or_404(Repo, id=repo_id) if repo_id else None
+
+        if action == 'toggle_active' and repo:
+            repo.is_active = not repo.is_active
+            repo.save(update_fields=['is_active'])
+            messages.success(
+                request,
+                f"Repository {repo.name} {'activated' if repo.is_active else 'deactivated'}.",
+            )
+            return redirect('/admin-panel/repositories/')
+        if action == 'reset_checkpoint' and repo:
+            repo.sync_checkpoint = None
+            repo.sync_cursor = ''
+            repo.sync_mode = ''
+            repo.sync_started_at = None
+            repo.last_sync_error = ''
+            repo.save(
+                update_fields=[
+                    'sync_checkpoint', 'sync_cursor', 'sync_mode',
+                    'sync_started_at', 'last_sync_error',
+                ]
+            )
+            messages.success(request, f"Sync checkpoint reset for {repo.name}.")
+            return redirect('/admin-panel/repositories/')
+        if action == 'delete' and repo:
+            repo.delete()
+            messages.success(request, "Repository removed from tracking.")
+            return redirect('/admin-panel/repositories/')
+
+        form = RepoForm(request.POST)
+        if form.is_valid():
+            repo_obj = form.save(commit=False)
+            if not repo_obj.name:
+                owner, name = parse_github_url(repo_obj.github_url)
+                repo_obj.name = f"{owner}/{name}" if owner and name else repo_obj.github_url
+            # Best-effort metadata enrichment; adding the repository never
+            # depends on GitHub being reachable.
+            owner, name = parse_github_url(repo_obj.github_url)
+            if owner and name and not repo_obj.language:
+                result = get_repository(owner, name)
+                if result['ok']:
+                    data = result['data']
+                    repo_obj.language = data.get('language') or ''
+                    repo_obj.stars = data.get('stargazers_count') or 0
+                    repo_obj.description = data.get('description') or ''
+            try:
+                repo_obj.save()
+            except IntegrityError:
+                messages.error(request, "That repository is already being tracked.")
+                return redirect('/admin-panel/repositories/')
+            messages.success(request, f"Tracking repository {repo_obj.name}.")
+            return redirect('/admin-panel/repositories/')
+        messages.error(request, "Could not add the repository. Check the URL.")
+    else:
+        form = RepoForm()
+
+    return render(
+        request,
+        'core/admin_panel/repositories.html',
+        {'repos': repos, 'form': form},
+    )
+
 
 @admin_required
 def admin_templates_view(request):
@@ -131,7 +204,7 @@ def admin_cheatsheet_view(request):
 @admin_required
 def admin_analytics_view(request):
     total_users = User.objects.count()
-    total_repos = Issue.objects.values('repo').distinct().count()
+    total_repos = Repo.objects.count()
     total_issues = Issue.objects.count()
     total_templates = Template.objects.count()
 
