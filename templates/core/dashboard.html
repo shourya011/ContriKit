@@ -11,8 +11,6 @@
           <h1 class="dashboard-header__title mb-0">Hello, {{ user.username }}!</h1>
           {% if is_platform_admin %}
             <span class="badge bg-danger badge-role">Admin</span>
-          {% elif is_editor %}
-            <span class="badge bg-indigo badge-role">Editor</span>
           {% else %}
             <span class="badge bg-secondary badge-role">Viewer</span>
           {% endif %}
@@ -26,15 +24,9 @@
         </p>
       </div>
       <div class="flex-shrink-0">
-        {% if not is_editor %}
-          <button type="button" class="btn btn-primary fw-semibold" data-bs-toggle="modal" data-bs-target="#upgradeModal">
-            <i class="bi bi-rocket-takeoff"></i> Become an Editor
-          </button>
-        {% else %}
-          <a href="/editor/repos/" class="btn btn-primary fw-semibold">
-            <i class="bi bi-code-square"></i> Editor Hub
-          </a>
-        {% endif %}
+        <a href="/issues/" class="btn btn-primary fw-semibold">
+          <i class="bi bi-search"></i> Browse Issues
+        </a>
       </div>
     </header>
 
@@ -72,19 +64,6 @@
           </div>
         </div>
       </div>
-      {% if is_editor %}
-      <div class="col-sm-6 col-lg-3">
-        <div class="dashboard-stat">
-          <div class="dashboard-stat__icon bg-indigo bg-opacity-10 text-indigo">
-            <i class="bi bi-megaphone"></i>
-          </div>
-          <div>
-            <div class="dashboard-stat__value">{{ posted_issues_count }}</div>
-            <p class="dashboard-stat__label">Posted Issues</p>
-          </div>
-        </div>
-      </div>
-      {% else %}
       <div class="col-sm-6 col-lg-3">
         <a href="/issues/" class="dashboard-stat text-decoration-none">
           <div class="dashboard-stat__icon bg-indigo bg-opacity-10 text-indigo">
@@ -96,7 +75,6 @@
           </div>
         </a>
       </div>
-      {% endif %}
     </div>
 
     <div class="row g-4">
@@ -178,35 +156,4 @@
   </div>
 </div>
 
-<!-- Become an Editor Modal -->
-<div class="modal fade" id="upgradeModal" tabindex="-1">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header border-bottom-0 pt-4 px-4">
-        <h5 class="modal-title fw-bold"><i class="bi bi-rocket-takeoff-fill text-indigo me-2"></i>Become an Editor</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-      </div>
-      <div class="modal-body px-4">
-        <p>As an Editor on ContribKit, you can:</p>
-        <ul class="text-muted small">
-          <li>Post beginner contribution opportunities for your projects</li>
-          <li>Link repositories instantly with GitHub URL auto-fill</li>
-          <li>Bulk-import candidate issues from GitHub</li>
-          <li>Track view counts and contributor engagement analytics</li>
-        </ul>
-        <div class="alert alert-info small mb-0">
-          <i class="bi bi-info-circle-fill me-2"></i>No approval needed. You can switch back to Viewer anytime in account settings without losing data.
-        </div>
-      </div>
-      <div class="modal-footer border-top-0 pb-4 px-4">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <form action="/dashboard/switch-role/" method="POST" class="m-0">
-          {% csrf_token %}
-          <input type="hidden" name="role" value="editor">
-          <button type="submit" class="btn btn-primary fw-semibold px-4">Upgrade Now</button>
-        </form>
-      </div>
-    </div>
-  </div>
-</div>
 {% endblock %}

@@ -2,7 +2,7 @@
 
 Mirrors the filters implemented in ``issues/views.py`` (keyword, language,
 difficulty, tag) so recommendations match what a user would see on
-``/issues/`` — no extra data, no admin/editor internals.
+``/issues/`` — no extra data, no admin internals.
 """
 
 import re
@@ -151,7 +151,7 @@ class GetIssueDetailsTool(AITool):
 
         data = _issue_dict(issue)
         data["description"] = issue.description
-        data["posted_by"] = issue.posted_by.username
+        data["posted_by"] = issue.posted_by.username if issue.posted_by else None
         return {"issue": data}
 
 

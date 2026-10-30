@@ -7,8 +7,6 @@ Privacy rules enforced here (mirror ContribKit's own rule set):
     - Saved issues / posted issues are the user's own (or public counts).
 """
 
-from issues.models import Issue
-
 from .base import AITool, ToolContext
 
 MAX_SAVED = 5
@@ -20,9 +18,9 @@ class GetUserContextTool(AITool):
     name = "get_user_context"
     description = (
         "Get safe context about the currently signed-in ContribKit user: "
-        "username, role (viewer/editor/admin), GitHub username, bio, and their "
-        "own saved/posted issues. Returns authenticated=false for guests. "
-        "Never reveals other users' private data."
+        "username, role (viewer/admin), GitHub username, bio, and their own "
+        "saved issues. Returns authenticated=false for guests. Never reveals "
+        "other users' private data."
     )
     parameters = {
         "type": "object",
@@ -45,7 +43,6 @@ class GetUserContextTool(AITool):
             "username": user.username,
             "role": user.role,
             "is_viewer": user.is_viewer,
-            "is_editor": user.is_editor,
             "is_platform_admin": user.is_platform_admin,
             "github_username": user.github_username or "",
             "bio": user.bio or "",
@@ -60,10 +57,4 @@ class GetUserContextTool(AITool):
                 for bookmark in saved
             ],
         }
-        if user.is_editor:
-            data["posted_issues_count"] = Issue.objects.filter(posted_by=user).count()
-            data["linked_repos_count"] = user.repos.count()
-            data["repositories"] = list(
-                user.repos.values("name", "language", "stars")[:MAX_SAVED]
-            )
         return data

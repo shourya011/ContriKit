@@ -26,7 +26,7 @@ from ai.services import (
 )
 from ai.views import _build_sources
 from issues.models import Issue
-from repos.models import Repo
+from issues.models import Repo
 
 User = get_user_model()
 
@@ -411,7 +411,6 @@ class WidgetRenderTests(TestCase):
     def setUpTestData(cls):
         cls.editor = User.objects.create_user(username="widget_editor", password="pw")
         cls.repo = Repo.objects.create(
-            editor=cls.editor,
             github_url="https://github.com/django/django",
             name="django/django",
             language="Python",
